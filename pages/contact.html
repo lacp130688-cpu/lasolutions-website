@@ -1,0 +1,179 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Contacta con laSolutions. Estamos para ayudarte con tu proxima computadora.">
+  <title>Contacto - laSolutions</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="../index.html" class="nav-logo">la<span>Solutions</span></a>
+      <button class="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-menu">
+        <li><a href="../index.html" class="nav-link">Inicio</a></li>
+        <li><a href="catalog.html" class="nav-link">Catalogo</a></li>
+        <li><a href="promotions.html" class="nav-link">Promociones</a></li>
+        <li><a href="contact.html" class="nav-link active">Contacto</a></li>
+        <li><a href="about.html" class="nav-link">Sobre Nosotros</a></li>
+      </ul>
+      <div class="nav-actions" id="nav-auth">
+        <a href="login.html" class="btn btn-sm btn-outline">Iniciar sesion</a>
+        <a href="register.html" class="btn btn-sm btn-primary">Registrarse</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="container section" style="padding-top: calc(var(--nav-height) + 3rem);">
+
+    <h1 class="section-title">Contactanos</h1>
+    <p style="text-align:center; max-width:600px; margin:-2rem auto 3rem;">Tienes preguntas? Estamos para ayudarte. Escribinos y te respondemos lo antes posible.</p>
+
+    <div class="contact-layout">
+
+      <!-- Contact Form -->
+      <div class="contact-form-card">
+        <h3>Envianos un mensaje</h3>
+
+        <div class="alert alert-success" id="contact-success"></div>
+        <div class="alert alert-error" id="contact-error"></div>
+
+        <form id="contact-form" novalidate>
+          <div class="form-group" id="fg-name">
+            <label for="name">Nombre *</label>
+            <input type="text" id="name" placeholder="Tu nombre" required>
+            <div class="error-msg">El nombre es requerido.</div>
+          </div>
+
+          <div class="form-group" id="fg-email">
+            <label for="email">Correo electronico *</label>
+            <input type="email" id="email" placeholder="tu@email.com" required>
+            <div class="error-msg">Ingresa un correo valido.</div>
+          </div>
+
+          <div class="form-group" id="fg-subject">
+            <label for="subject">Asunto *</label>
+            <input type="text" id="subject" placeholder="Consulta sobre..." required>
+            <div class="error-msg">El asunto es requerido.</div>
+          </div>
+
+          <div class="form-group" id="fg-message">
+            <label for="message">Mensaje *</label>
+            <textarea id="message" placeholder="Escribe tu mensaje aqui..." required></textarea>
+            <div class="error-msg">El mensaje es requerido.</div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">Enviar mensaje</button>
+        </form>
+      </div>
+
+      <!-- Contact Info -->
+      <div>
+        <div class="contact-info-card">
+          <h3>Informacion de contacto</h3>
+
+          <div class="contact-item">
+            <div class="contact-item-icon">&#9993;</div>
+            <div class="contact-item-text">
+              <h4>Correo electronico</h4>
+              <p><a href="mailto:lacp130688@gmail.com">lacp130688@gmail.com</a></p>
+            </div>
+          </div>
+
+          <div class="contact-item">
+            <div class="contact-item-icon">&#9873;</div>
+            <div class="contact-item-text">
+              <h4>Ubicacion</h4>
+              <p>Buenos Aires, Argentina</p>
+            </div>
+          </div>
+
+          <div class="contact-item">
+            <div class="contact-item-icon">&#9200;</div>
+            <div class="contact-item-text">
+              <h4>Horarios de atencion</h4>
+              <p>Lunes a Viernes: 9:00 - 18:00</p>
+              <p>Sabados: 10:00 - 14:00</p>
+              <p>Domingos: Cerrado</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Map Placeholder -->
+        <div class="contact-info-card" style="margin-top:1.5rem;">
+          <h3>Ubicacion</h3>
+          <div class="map-placeholder">
+            <div style="text-align:center;">
+              <div style="font-size:2rem; margin-bottom:0.5rem;">&#9906;</div>
+              <p style="font-size:0.85rem;">Mapa - Buenos Aires, Argentina</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>&copy; 2026 laSolutions. Todos los derechos reservados.</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Facebook">FB</a>
+          <a href="#" aria-label="Instagram">IG</a>
+          <a href="#" aria-label="Twitter">TW</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="../js/app.js"></script>
+  <script src="../js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var form = document.getElementById('contact-form');
+      var successAlert = document.getElementById('contact-success');
+      var errorAlert = document.getElementById('contact-error');
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        successAlert.classList.remove('show');
+        errorAlert.classList.remove('show');
+        document.querySelectorAll('.form-group').forEach(function (fg) { fg.classList.remove('error'); });
+
+        var name = document.getElementById('name').value.trim();
+        var email = document.getElementById('email').value.trim();
+        var subject = document.getElementById('subject').value.trim();
+        var message = document.getElementById('message').value.trim();
+
+        var valid = true;
+        if (!name) { document.getElementById('fg-name').classList.add('error'); valid = false; }
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { document.getElementById('fg-email').classList.add('error'); valid = false; }
+        if (!subject) { document.getElementById('fg-subject').classList.add('error'); valid = false; }
+        if (!message) { document.getElementById('fg-message').classList.add('error'); valid = false; }
+
+        if (!valid) return;
+
+        // Simulate form submission
+        successAlert.textContent = 'Mensaje enviado correctamente. Te responderemos a la brevedad.';
+        successAlert.classList.add('show');
+        form.reset();
+
+        // Scroll to success message
+        successAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    });
+  </script>
+
+</body>
+</html>

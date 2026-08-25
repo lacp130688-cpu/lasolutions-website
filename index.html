@@ -1,0 +1,130 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="laSolutions - Computadoras de escritorio, Gaming PCs y Laptops de alta calidad. Tecnologia que impulsa tu rendimiento.">
+  <meta name="keywords" content="computadoras, gaming, laptops, escritorio, laSolutions, tecnologia">
+  <meta name="author" content="laSolutions">
+  <title>laSolutions - Computadoras de Alto Rendimiento</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="nav-logo">la<span>Solutions</span></a>
+      <button class="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-menu">
+        <li><a href="index.html" class="nav-link active">Inicio</a></li>
+        <li><a href="pages/catalog.html" class="nav-link">Catalogo</a></li>
+        <li><a href="pages/promotions.html" class="nav-link">Promociones</a></li>
+        <li><a href="pages/contact.html" class="nav-link">Contacto</a></li>
+        <li><a href="pages/about.html" class="nav-link">Sobre Nosotros</a></li>
+      </ul>
+      <div class="nav-actions" id="nav-auth">
+        <a href="pages/login.html" class="btn btn-sm btn-outline">Iniciar sesion</a>
+        <a href="pages/register.html" class="btn btn-sm btn-primary">Registrarse</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <h1>Tecnologia que <span class="highlight">impulsa</span> tu rendimiento</h1>
+        <p>En laSolutions construimos computadoras de alto rendimiento para profesionales, gamers y creativos. Calidad, potencia y soporte que puedes confiar.</p>
+        <div class="hero-buttons">
+          <a href="pages/catalog.html" class="btn btn-accent btn-lg">Ver catalogo</a>
+          <a href="pages/about.html" class="btn btn-outline btn-lg">Conocenos</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <img src="assets/placeholder.svg" alt="Computadora laSolutions">
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Products -->
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">Productos destacados</h2>
+      <div class="featured-grid" id="featured-grid">
+        <!-- Rendered by catalog.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Promotions Banner -->
+  <section class="section" style="padding-top: 0;">
+    <div class="container">
+      <div class="promo-banner" id="promo-banner">
+        <!-- Rendered by promotions.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h3>la<span>Solutions</span></h3>
+          <p>Computadoras de alto rendimiento para profesionales, gamers y creativos. Mas de 10 anios brindando soluciones tecnologicas.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Productos</h4>
+          <a href="pages/catalog.html">Escritorios</a>
+          <a href="pages/catalog.html">Gaming PCs</a>
+          <a href="pages/catalog.html">Laptops</a>
+          <a href="pages/promotions.html">Ofertas</a>
+        </div>
+        <div class="footer-col">
+          <h4>Empresa</h4>
+          <a href="pages/about.html">Sobre nosotros</a>
+          <a href="pages/contact.html">Contacto</a>
+          <a href="#">Soporte</a>
+          <a href="#">Garantia</a>
+        </div>
+        <div class="footer-col">
+          <h4>Contacto</h4>
+          <a href="mailto:lacp130688@gmail.com">lacp130688@gmail.com</a>
+          <a href="#">Buenos Aires, Argentina</a>
+          <a href="#">Lun - Vie: 9:00 - 18:00</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 laSolutions. Todos los derechos reservados.</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Facebook">FB</a>
+          <a href="#" aria-label="Instagram">IG</a>
+          <a href="#" aria-label="Twitter">TW</a>
+          <a href="#" aria-label="YouTube">YT</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Product Modal -->
+  <div class="modal-overlay" id="product-modal"></div>
+
+  <!-- Scripts -->
+  <script src="js/app.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/catalog.js"></script>
+  <script src="js/promotions.js"></script>
+  <script>
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function () {
+      applyPromotions();
+      renderFeaturedProducts();
+      renderPromoBanner();
+    });
+  </script>
+
+</body>
+</html>

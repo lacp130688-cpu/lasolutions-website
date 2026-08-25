@@ -1,0 +1,125 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Catalogo completo de computadoras laSolutions - Escritorios, Gaming PCs y Laptops.">
+  <title>Catalogo - laSolutions</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="../index.html" class="nav-logo">la<span>Solutions</span></a>
+      <button class="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-menu">
+        <li><a href="../index.html" class="nav-link">Inicio</a></li>
+        <li><a href="catalog.html" class="nav-link active">Catalogo</a></li>
+        <li><a href="promotions.html" class="nav-link">Promociones</a></li>
+        <li><a href="contact.html" class="nav-link">Contacto</a></li>
+        <li><a href="about.html" class="nav-link">Sobre Nosotros</a></li>
+      </ul>
+      <div class="nav-actions" id="nav-auth">
+        <a href="login.html" class="btn btn-sm btn-outline">Iniciar sesion</a>
+        <a href="register.html" class="btn btn-sm btn-primary">Registrarse</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="container">
+    <div class="catalog-layout">
+
+      <!-- Sidebar Filters -->
+      <aside class="catalog-sidebar" id="catalog-sidebar">
+        <h3>Filtros</h3>
+
+        <div class="filter-group">
+          <h4>Categoria</h4>
+          <label><input type="checkbox" data-filter-type="category" value="Escritorio"> Escritorio</label>
+          <label><input type="checkbox" data-filter-type="category" value="Gaming"> Gaming</label>
+          <label><input type="checkbox" data-filter-type="category" value="Laptop"> Laptop</label>
+        </div>
+
+        <div class="filter-group">
+          <h4>Rango de precio</h4>
+          <label><input type="checkbox" data-filter-type="price" data-range-index="0"> Menos de $700</label>
+          <label><input type="checkbox" data-filter-type="price" data-range-index="1"> $700 - $1,000</label>
+          <label><input type="checkbox" data-filter-type="price" data-range-index="2"> $1,000 - $1,500</label>
+          <label><input type="checkbox" data-filter-type="price" data-range-index="3"> Mas de $1,500</label>
+        </div>
+
+        <div class="filter-group">
+          <h4>Marca</h4>
+          <label><input type="checkbox" data-filter-type="brand" value="laSolutions"> laSolutions</label>
+        </div>
+      </aside>
+
+      <!-- Products Area -->
+      <div class="catalog-main">
+        <div class="catalog-top">
+          <button class="btn btn-outline btn-sm" id="filter-toggle" style="display:none;">Filtros</button>
+          <div class="search-box">
+            <span class="search-icon">&#128269;</span>
+            <input type="text" id="catalog-search" placeholder="Buscar productos...">
+          </div>
+          <select class="sort-select" id="catalog-sort">
+            <option value="default">Ordenar por</option>
+            <option value="price-asc">Menor precio</option>
+            <option value="price-desc">Mayor precio</option>
+            <option value="name">Nombre A-Z</option>
+          </select>
+        </div>
+
+        <p class="product-count" id="product-count"></p>
+        <div class="catalog-grid" id="catalog-grid">
+          <!-- Rendered by catalog.js -->
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>&copy; 2026 laSolutions. Todos los derechos reservados.</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Facebook">FB</a>
+          <a href="#" aria-label="Instagram">IG</a>
+          <a href="#" aria-label="Twitter">TW</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Product Modal -->
+  <div class="modal-overlay" id="product-modal"></div>
+
+  <!-- Scripts -->
+  <script src="../js/app.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/catalog.js"></script>
+  <script src="../js/promotions.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      applyPromotions();
+      initCatalog();
+    });
+
+    // Show filter toggle on smaller screens
+    (function () {
+      var toggle = document.getElementById('filter-toggle');
+      if (toggle && window.innerWidth <= 1024) {
+        toggle.style.display = 'inline-flex';
+      }
+    })();
+  </script>
+
+</body>
+</html>
