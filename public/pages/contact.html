@@ -135,16 +135,19 @@
     </div>
   </footer>
 
-  <!-- Scripts -->
+<!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-config.js"></script>
   <script src="../js/app.js"></script>
   <script src="../js/auth.js"></script>
+  <script src="../js/contact.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       var form = document.getElementById('contact-form');
       var successAlert = document.getElementById('contact-success');
       var errorAlert = document.getElementById('contact-error');
 
-      form.addEventListener('submit', function (e) {
+      form.addEventListener('submit', async function (e) {
         e.preventDefault();
 
         successAlert.classList.remove('show');
@@ -164,13 +167,19 @@
 
         if (!valid) return;
 
-        // Simulate form submission
-        successAlert.textContent = 'Mensaje enviado correctamente. Te responderemos a la brevedad.';
-        successAlert.classList.add('show');
-        form.reset();
+        // Enviar mensaje a Supabase
+        var result = await submitContactMessage({ name: name, email: email, subject: subject, message: message });
 
-        // Scroll to success message
-        successAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (result.success) {
+          successAlert.textContent = result.message;
+          successAlert.classList.add('show');
+          form.reset();
+          // Scroll to success message
+          successAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          errorAlert.textContent = result.message;
+          errorAlert.classList.add('show');
+        }
       });
     });
   </script>

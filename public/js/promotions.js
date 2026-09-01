@@ -1,78 +1,45 @@
 ﻿/* ============================================
    laSolutions - Promotions Module
-   Deals data, countdown timers, deal-of-day
+   Countdown timers, deal-of-day, promo banner
+   Data loaded from Supabase via loadSiteData()
    ============================================ */
 
 // ---------- Promotions Data ----------
-var PROMOTIONS = [
-  {
-    productId: 1,
-    discount: 15,
-    salePrice: 764,
-    endDate: null, // Will be set dynamically
-    label: 'Oferta de escritorio'
-  },
-  {
-    productId: 4,
-    discount: 10,
-    salePrice: 1349,
-    endDate: null,
-    label: 'Oferta gaming'
-  },
-  {
-    productId: 7,
-    discount: 20,
-    salePrice: 879,
-    endDate: null,
-    label: 'Oferta laptop'
-  },
-  {
-    productId: 9,
-    discount: 25,
-    salePrice: 449,
-    endDate: null,
-    label: 'Oferta laptop'
-  }
-];
+var PROMOTIONS = [];
 
-// Set end dates (different durations for each promo)
-function initPromoDates() {
-  var now = Date.now();
-  PROMOTIONS[0].endDate = now + 2 * 24 * 60 * 60 * 1000 + 5 * 60 * 60 * 1000; // 2 days 5 hours
-  PROMOTIONS[1].endDate = now + 1 * 24 * 60 * 60 * 1000 + 12 * 60 * 60 * 1000; // 1 day 12 hours
-  PROMOTIONS[2].endDate = now + 3 * 24 * 60 * 60 * 1000 + 8 * 60 * 60 * 1000; // 3 days 8 hours
-  PROMOTIONS[3].endDate = now + 5 * 60 * 60 * 1000 + 30 * 60 * 1000; // 5 hours 30 min
-}
-
-// ---------- Apply promotions to product data ----------
+// ---------- Apply promotions to product data (idempotent) ----------
 function applyPromotions() {
-  if (typeof PRODUCTS === 'undefined') return;
+  if (!window.PRODUCTS || !window.PRODUCTS.length) return;
+  if (!window.PROMOTIONS || !window.PROMOTIONS.length) return;
 
-  PRODUCTS.forEach(function (product) {
-    var promo = PROMOTIONS.find(function (p) { return p.productId === product.id; });
+  window.PRODUCTS.forEach(function (product) {
+    var promo = window.PROMOTIONS.find(function (p) { return p.productId === product.id; });
     if (promo) {
-      product.originalPrice = product.price;
+      product.originalPrice = product.originalPrice || product.price;
       product.price = promo.salePrice;
       product.onSale = true;
+      product.discount = promo.discount;
     }
   });
 }
 
 // ---------- Get deal of the day ----------
 function getDealOfTheDay() {
-  // The deal with the highest discount
-  var bestDeal = PROMOTIONS.reduce(function (best, current) {
+  if (!window.PROMOTIONS || !window.PROMOTIONS.length) return null;
+  var bestDeal = window.PROMOTIONS.reduce(function (best, current) {
     return current.discount > best.discount ? current : best;
   });
   return bestDeal;
 }
 
 function getPromoForProduct(productId) {
-  return PROMOTIONS.find(function (p) { return p.productId === productId; });
+  if (!window.PROMOTIONS || !window.PROMOTIONS.length) return null;
+  return window.PROMOTIONS.find(function (p) { return p.productId === productId; });
 }
 
 // ---------- Countdown Timer ----------
 function formatCountdown(endTime) {
+  if (!endTime) return { days: 0, hours: 0, minutes: 0, seconds: 0, expired: true };
   var diff = endTime - Date.now();
   if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0, expired: true };
 
@@ -108,15 +75,22 @@ function renderPromotionsPage() {
 
   if (!dealContainer && !promoGrid) return;
 
-  initPromoDates();
+  var promos = window.PROMOTIONS || [];
+  var products = window.PRODUCTS || [];
+
+  if (!promos.length) {
+    if (dealContainer) dealContainer.innerHTML = '<p style="text-align:center;">No hay promociones disponibles en este momento.</p>';
+    if (promoGrid) promoGrid.innerHTML = '';
+    return;
+  }
 
   // Deal of the day
   var deal = getDealOfTheDay();
-  var dealProduct = typeof PRODUCTS !== 'undefined'
-    ? PRODUCTS.find(function (p) { return p.id === deal.productId; })
+  var dealProduct = deal
+    ? products.find(function (p) { return p.id === deal.productId; })
     : null;
 
-  if (dealContainer && dealProduct) {
+  if (dealContainer && dealProduct && deal) {
     var base = typeof getBasePath === 'function' ? getBasePath() : '';
     dealContainer.innerHTML =
       '<div>' +
@@ -139,13 +113,11 @@ function renderPromotionsPage() {
 
   // Other promotions
   if (promoGrid) {
-    var otherPromos = PROMOTIONS.filter(function (p) { return p.productId !== deal.productId; });
+    var otherPromos = promos.filter(function (p) { return deal && p.productId !== deal.productId; });
     var html = '';
 
     otherPromos.forEach(function (promo, index) {
-      var product = typeof PRODUCTS !== 'undefined'
-        ? PRODUCTS.find(function (p) { return p.id === promo.productId; })
-        : null;
+      var product = products.find(function (p) { return p.id === promo.productId; });
       if (!product) return;
 
       var base = typeof getBasePath === 'function' ? getBasePath() : '';
@@ -177,12 +149,15 @@ function renderPromotionsPage() {
 }
 
 function startCountdowns() {
-  // Deal of the day countdown
-  var deal = getDealOfTheDay();
-  renderCountdown(deal.endDate, 'deal-countdown');
+  var promos = window.PROMOTIONS || [];
+  if (!promos.length) return;
 
-  // Other promo countdowns
-  var otherPromos = PROMOTIONS.filter(function (p) { return p.productId !== deal.productId; });
+  var deal = getDealOfTheDay();
+  if (deal) {
+    renderCountdown(deal.endDate, 'deal-countdown');
+  }
+
+  var otherPromos = deal ? promos.filter(function (p) { return p.productId !== deal.productId; }) : [];
   otherPromos.forEach(function (promo, index) {
     renderCountdown(promo.endDate, 'promo-countdown-' + index);
   });
@@ -190,7 +165,7 @@ function startCountdowns() {
   // Update every second
   if (window._promoInterval) clearInterval(window._promoInterval);
   window._promoInterval = setInterval(function () {
-    renderCountdown(deal.endDate, 'deal-countdown');
+    if (deal) renderCountdown(deal.endDate, 'deal-countdown');
     otherPromos.forEach(function (promo, index) {
       renderCountdown(promo.endDate, 'promo-countdown-' + index);
     });
@@ -202,14 +177,20 @@ function renderPromoBanner() {
   var banner = document.getElementById('promo-banner');
   if (!banner) return;
 
-  initPromoDates();
-  var totalSavings = PROMOTIONS.reduce(function (sum, p) { return sum + p.discount; }, 0);
+  var promos = window.PROMOTIONS || [];
+  if (!promos.length) {
+    banner.innerHTML = '';
+    return;
+  }
+
+  var totalSavings = promos.reduce(function (sum, p) { return sum + p.discount; }, 0);
+  var maxDiscount = Math.max.apply(null, promos.map(function (p) { return p.discount; }));
   var base = typeof getBasePath === 'function' ? getBasePath() : '';
 
   banner.innerHTML =
     '<div class="promo-banner-text">' +
       '<h2>Ofertas Especiales</h2>' +
-      '<p>Hasta ' + Math.max.apply(null, PROMOTIONS.map(function (p) { return p.discount; })) + '% de descuento en productos seleccionados. No te las pierdas.</p>' +
+      '<p>Hasta ' + maxDiscount + '% de descuento en productos seleccionados. No te las pierdas.</p>' +
       '<a href="' + base + 'pages/promotions.html" class="btn btn-accent">Ver todas las ofertas</a>' +
     '</div>';
 }

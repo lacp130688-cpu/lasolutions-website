@@ -11,3 +11,9 @@ Desktop.ini
 
 # Logs
 *.log
+
+# Env / Secrets
+.env
+.env.local
+.env.production
+netlify/functions/**/.env

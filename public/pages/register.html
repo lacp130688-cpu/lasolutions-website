@@ -79,13 +79,15 @@
     </div>
   </main>
 
-  <!-- Scripts -->
+<!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-config.js"></script>
   <script src="../js/app.js"></script>
   <script src="../js/auth.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', async function () {
       // Redirect if already logged in
-      if (isLoggedIn()) {
+      if (await isLoggedIn()) {
         window.location.href = '../index.html';
         return;
       }
@@ -94,7 +96,7 @@
       var successAlert = document.getElementById('reg-success');
       var errorAlert = document.getElementById('reg-error');
 
-      form.addEventListener('submit', function (e) {
+      form.addEventListener('submit', async function (e) {
         e.preventDefault();
 
         // Reset
@@ -134,7 +136,7 @@
 
         if (!valid) return;
 
-        var result = register(name, email, password);
+        var result = await register(name, email, password, phone);
         if (result.success) {
           successAlert.textContent = result.message;
           successAlert.classList.add('show');

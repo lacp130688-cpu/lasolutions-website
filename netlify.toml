@@ -1,0 +1,39 @@
+# ============================================================
+# laSolutions - Netlify configuration
+# Publica el contenido de /public como sitio estatico
+# ============================================================
+
+[build]
+  publish = "public"
+  command = ""
+
+# Headers de seguridad + Supabase CSP
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+# Cache: assets inmutables
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Cache: JS/CSS
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+# SPA fallback (todas las rutas -> index.html)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

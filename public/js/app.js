@@ -42,13 +42,15 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  // Update nav auth state
-  updateNavAuth();
+  // Update nav auth state (async)
+  getCurrentUser().then(renderNavAuth);
+
+  // Listen for live session changes
+  onAuthChange(renderNavAuth);
 });
 
 // ---------- Navigation Auth State ----------
-function updateNavAuth() {
-  const user = getCurrentUser();
+function renderNavAuth(user) {
   const authContainer = document.getElementById('nav-auth');
   if (!authContainer) return;
 
@@ -66,10 +68,10 @@ function updateNavAuth() {
 }
 
 function handleLogout() {
-  logout();
-  const base = getBasePath();
-  // If on a page that requires auth, redirect to home
-  window.location.href = base + 'index.html';
+  logout().then(function () {
+    const base = getBasePath();
+    window.location.href = base + 'index.html';
+  });
 }
 
 // ---------- Smooth Scroll ----------

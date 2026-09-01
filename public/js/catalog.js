@@ -1,113 +1,82 @@
 ﻿/* ============================================
    laSolutions - Product Catalog Module
-   Data, filtering, search, sort, rendering
+   Supabase data layer, filtering, search, sort, rendering
    ============================================ */
 
 // ---------- Product Data ----------
-var PRODUCTS = [
-  // Desktops
-  {
-    id: 1,
-    name: 'laSolutions Pro Desktop',
-    category: 'Escritorio',
-    brand: 'laSolutions',
-    price: 899,
-    originalPrice: 899,
-    description: 'Potente escritorio para profesionales. Ideal para oficina, desarrollo y multitarea exigente.',
-    specs: ['Intel Core i5-13400', '16GB DDR4 RAM', '512GB SSD NVMe', 'Windows 11 Pro'],
-    image: 'assets/placeholder.svg'
-  },
-  {
-    id: 2,
-    name: 'laSolutions Office Station',
-    category: 'Escritorio',
-    brand: 'laSolutions',
-    price: 649,
-    originalPrice: 649,
-    description: 'Estacion de trabajo compacta para tareas de oficina, navegacion y productividad basica.',
-    specs: ['Intel Core i3-12100', '8GB DDR4 RAM', '256GB SSD', 'Windows 11 Home'],
-    image: 'assets/placeholder.svg'
-  },
-  {
-    id: 3,
-    name: 'laSolutions Creator Desktop',
-    category: 'Escritorio',
-    brand: 'laSolutions',
-    price: 1299,
-    originalPrice: 1299,
-    description: 'Estacion creativa para editores de video, diseno grafico y modelado 3D.',
-    specs: ['Intel Core i7-13700', '32GB DDR5 RAM', '1TB SSD NVMe', 'Windows 11 Pro'],
-    image: 'assets/placeholder.svg'
-  },
-  // Gaming
-  {
-    id: 4,
-    name: 'laSolutions Gamer Elite',
-    category: 'Gaming',
-    brand: 'laSolutions',
-    price: 1499,
-    originalPrice: 1499,
-    description: 'PC gaming de gama media-alta para jugar en 1440p con altas tasas deFrames.',
-    specs: ['AMD Ryzen 7 7800X', 'NVIDIA RTX 4070 12GB', '32GB DDR5 RAM', '1TB SSD NVMe'],
-    image: 'assets/placeholder.svg'
-  },
-  {
-    id: 5,
-    name: 'laSolutions Gamer Ultra',
-    category: 'Gaming',
-    brand: 'laSolutions',
-    price: 2199,
-    originalPrice: 2199,
-    description: 'La bestia gaming definitiva. Rendimiento extremo en 4K y streaming simultaneo.',
-    specs: ['Intel Core i9-13900K', 'NVIDIA RTX 4080 16GB', '64GB DDR5 RAM', '2TB SSD NVMe'],
-    image: 'assets/placeholder.svg'
-  },
-  {
-    id: 6,
-    name: 'laSolutions Gamer Starter',
-    category: 'Gaming',
-    brand: 'laSolutions',
-    price: 999,
-    originalPrice: 999,
-    description: 'Tu primera PC gaming con rendimiento solido en 1080p para los juegos populares.',
-    specs: ['AMD Ryzen 5 7600', 'NVIDIA RTX 4060 8GB', '16GB DDR5 RAM', '512GB SSD NVMe'],
-    image: 'assets/placeholder.svg'
-  },
-  // Laptops
-  {
-    id: 7,
-    name: 'laSolutions Laptop Pro 15',
-    category: 'Laptop',
-    brand: 'laSolutions',
-    price: 1099,
-    originalPrice: 1099,
-    description: 'Laptop profesional de 15.6 pulgadas con potencia para trabajar desde cualquier lugar.',
-    specs: ['Intel Core i7-13700H', '16GB DDR5 RAM', '512GB SSD NVMe', '15.6" Full HD IPS'],
-    image: 'assets/placeholder.svg'
-  },
-  {
-    id: 8,
-    name: 'laSolutions Laptop Ultra 14',
-    category: 'Laptop',
-    brand: 'laSolutions',
-    price: 1399,
-    originalPrice: 1399,
-    description: 'Laptop ultradelgada con pantalla 2K, perfecta para profesionales exigentes.',
-    specs: ['Intel Core i7-13700H', '32GB DDR5 RAM', '1TB SSD NVMe', '14" 2K IPS 120Hz'],
-    image: 'assets/placeholder.svg'
-  },
-  {
-    id: 9,
-    name: 'laSolutions Laptop Essential',
-    category: 'Laptop',
-    brand: 'laSolutions',
-    price: 599,
-    originalPrice: 599,
-    description: 'Laptop accesible para estudios, oficina y uso diario. Excelente relacion precio-calidad.',
-    specs: ['Intel Core i5-1235U', '8GB DDR4 RAM', '256GB SSD', '14" Full HD'],
-    image: 'assets/placeholder.svg'
-  }
-];
+var PRODUCTS = [];
+var PRODUCTS_LOADED = false;
+
+// ---------- Load data from Supabase ----------
+function loadSiteData() {
+  if (PRODUCTS_LOADED) return Promise.resolve(PRODUCTS);
+
+  return Promise.all([
+    supabase.from('products').select('*').eq('active', true).order('id'),
+    supabase.from('promotions').select('*').eq('active', true)
+  ])
+    .then(function (results) {
+      var productsRows = results[0].data || [];
+      var promoRows = results[1].data || [];
+
+      // Build legacy PROMOTIONS array
+      // Postgres numeric viene como string: se convierte con Number()
+      window.PROMOTIONS = promoRows.map(function (promo) {
+        return {
+          productId: promo.product_id,
+          discount: promo.discount,
+          salePrice: Number(promo.sale_price),
+          endDate: promo.ends_at ? Date.parse(promo.ends_at) : null,
+          label: promo.label || ''
+        };
+      });
+
+      // Merge products with promos
+      PRODUCTS = productsRows.map(function (product) {
+        var specs = product.specs;
+        if (typeof specs === 'string') {
+          try { specs = JSON.parse(specs); } catch (e) { specs = []; }
+        }
+        if (!Array.isArray(specs)) specs = [];
+
+        var originalPrice = Number(product.original_price || product.price);
+        var price = Number(product.price);
+        var onSale = false;
+        var discount = 0;
+
+        var promo = window.PROMOTIONS.find(function (p) { return p.productId === product.id; });
+        if (promo) {
+          price = promo.salePrice;
+          onSale = true;
+          discount = promo.discount;
+        }
+
+        return {
+          id: product.id,
+          name: product.name,
+          category: product.category,
+          brand: product.brand,
+          price: price,
+          originalPrice: originalPrice,
+          description: product.description,
+          specs: specs,
+          image: product.image || 'assets/placeholder.svg',
+          onSale: onSale,
+          discount: discount,
+          featured: product.featured
+        };
+      });
+
+      PRODUCTS_LOADED = true;
+      return PRODUCTS;
+    })
+    .catch(function (err) {
+      console.error('Error cargando datos:', err);
+      PRODUCTS = [];
+      window.PROMOTIONS = [];
+      return PRODUCTS;
+    });
+}
 
 // ---------- State ----------
 var catalogState = {
@@ -308,11 +277,7 @@ function renderFeaturedProducts() {
   var grid = document.getElementById('featured-grid');
   if (!grid) return;
 
-  // One per category: id 1 (Desktop), 4 (Gaming), 7 (Laptop)
-  var featuredIds = [1, 4, 7];
-  var featured = featuredIds.map(function (id) {
-    return PRODUCTS.find(function (p) { return p.id === id; });
-  }).filter(Boolean);
+  var featured = PRODUCTS.filter(function (p) { return p.featured === true; });
 
   grid.innerHTML = featured.map(renderProductCard).join('');
 }
