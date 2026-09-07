@@ -19,3 +19,4 @@ openspec/
 | Change ID | Description | Status |
 |---|---|---|
 | `supabase-netlify-migration` | Migrate the static site to Supabase (database + auth) and Netlify (hosting) | Implemented |
+| `admin-panel` | Admin panel: product/promotion CRUD, storage image upload, RLS hardening | Implemented |

@@ -1,8 +1,9 @@
 # Change Proposal: Admin Panel for Product Management
 
-> **Status**: IMPLEMENTED — panel admin construido (admin.html + admin.js).
-> Pendiente: verificar en vivo y replicar el link del footer en las demas
-> paginas. Bucket `product-images` debe crearse en Storage para subir imagenes.
+> **Status**: IMPLEMENTED — panel admin construido (admin.html + admin.js) y
+> verificado en vivo: login OK, bucket `product-images` creado, alta de
+> producto con imagen OK, catálogo público mostrando la imagen.
+> Pendiente opcional: replicar el link del footer en las demas paginas.
 
 ## Intent
 
@@ -36,9 +37,11 @@ interface, and product images are static files referenced by URL.
 - No order management, payments, or inventory analytics.
 - No image resizing/optimization pipeline (can be added later).
 
-## Open Decisions
+## Resolved Decisions
 
-- Where the admin flag lives: `user_metadata`, a `profiles` table, or a
-  custom claim. Likely: `profiles` table joined by `auth.uid()`.
-- Storage bucket visibility: public-read with signed URLs vs fully public.
-- Product image handling on the client (preview, size limits, format checks).
+- Admin identity: dedicated `admin_users` table + `is_admin()` SECURITY
+  DEFINER function (not user metadata).
+- Storage bucket: `product-images`, fully public read, admin-only write via
+  policies on `storage.objects`.
+- Client image handling: file input with preview, MIME allow-list
+  (JPG/PNG/WEBP/GIF), 2MB max.

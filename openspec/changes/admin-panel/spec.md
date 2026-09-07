@@ -1,7 +1,8 @@
-# Change Spec: Admin Panel for Product Management (Deferred)
+# Change Spec: Admin Panel for Product Management
 
-> **Status**: IMPLEMENTED — ver REQ-ADM-1 (hecho via `admin_users` + `is_admin()`),
-> REQ-ADM-2/3 (form + upload a bucket `product-images`), REQ-ADM-4 (admin.html).
+> **Status**: IMPLEMENTED and verified live — REQ-ADM-1 via `admin_users` +
+> `is_admin()` (RLS), REQ-ADM-2/3 (form + upload to the `product-images`
+> bucket), REQ-ADM-4 (admin.html). SCEN-ADM-1/2/3 confirmed on 2026-09-07.
 
 ## Requirements
 
