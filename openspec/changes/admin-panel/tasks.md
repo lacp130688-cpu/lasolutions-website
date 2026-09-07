@@ -50,9 +50,10 @@
       and public catalog showing the uploaded image (fixed via
       `resolveImageUrl()`).
 
-## Owner follow-ups (optional)
+## Owner follow-ups
 
-- [ ] T13 — Replicate the Admin footer link to the other pages (about,
-      catalog, contact, login, promotions, register).
-- [ ] T14 — Revisit panel loading speed if the initial dashboard render
-      feels slow.
+- [x] T13 — Replicate the Admin footer link to the other pages (about,
+      catalog, contact, login, promotions, register) — done 2026-09-07.
+- [ ] T14 — Revisit panel loading speed: load timing instrumented
+      (`load-stats` shows ms per section); waiting for a live measurement to
+      confirm whether any optimization is needed.

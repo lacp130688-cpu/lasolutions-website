@@ -164,18 +164,40 @@ function showTab(tab) {
 /* ------------------------------------------------------------
    Productos
    ------------------------------------------------------------ */
+// Timing de carga por seccion (diagnostico de lentitud del panel)
+var LOAD_TIMES = { products: null, promos: null, messages: null };
+
+function recordLoadTime(key, startedAt) {
+  LOAD_TIMES[key] = Math.round(performance.now() - startedAt);
+  renderLoadTimes();
+}
+
+function renderLoadTimes() {
+  var el = document.getElementById('load-stats');
+  if (!el) return;
+  var parts = [];
+  if (LOAD_TIMES.products !== null) parts.push('productos: ' + LOAD_TIMES.products + 'ms');
+  if (LOAD_TIMES.promos !== null) parts.push('promos: ' + LOAD_TIMES.promos + 'ms');
+  if (LOAD_TIMES.messages !== null) parts.push('mensajes: ' + LOAD_TIMES.messages + 'ms');
+  el.textContent = parts.length ? 'Tiempo de carga - ' + parts.join(' | ') : '';
+}
+
 function loadProducts() {
+  var t0 = performance.now();
   var tbody = document.getElementById('products-tbody');
   tbody.innerHTML = '<tr><td colspan="8" class="table-empty">Cargando productos...</td></tr>';
 
   supabase.from('products').select('*').order('id', { ascending: true }).then(function (res) {
     if (res.error) {
+      recordLoadTime('products', t0);
       tbody.innerHTML = '<tr><td colspan="8" class="table-empty">Error cargando productos: ' + escapeHtml(res.error.message) + '</td></tr>';
       return;
     }
+    recordLoadTime('products', t0);
     PRODUCTS_CACHE = res.data || [];
     renderProductsTable();
   }).catch(function (err) {
+    recordLoadTime('products', t0);
     tbody.innerHTML = '<tr><td colspan="8" class="table-empty">Error cargando productos: ' + escapeHtml(err && err.message ? err.message : err) + '</td></tr>';
   });
 }
@@ -425,18 +447,22 @@ function onProductImageUrlChange() {
    Promociones
    ------------------------------------------------------------ */
 function loadPromotions() {
+  var t0 = performance.now();
   var tbody = document.getElementById('promos-tbody');
   tbody.innerHTML = '<tr><td colspan="6" class="table-empty">Cargando promociones...</td></tr>';
 
   supabase.from('promotions').select('*').order('product_id', { ascending: true }).then(function (res) {
     if (res.error) {
+      recordLoadTime('promos', t0);
       tbody.innerHTML = '<tr><td colspan="6" class="table-empty">Error cargando promociones: ' + escapeHtml(res.error.message) + '</td></tr>';
       return;
     }
+    recordLoadTime('promos', t0);
     PROMOS_CACHE = res.data || [];
     renderPromosTable();
     populatePromoProductSelect();
   }).catch(function (err) {
+    recordLoadTime('promos', t0);
     tbody.innerHTML = '<tr><td colspan="6" class="table-empty">Error cargando promociones: ' + escapeHtml(err && err.message ? err.message : err) + '</td></tr>';
   });
 }
@@ -603,14 +629,17 @@ function cancelPromoForm() {
    Mensajes de contacto (solo lectura)
    ------------------------------------------------------------ */
 function loadMessages() {
+  var t0 = performance.now();
   var tbody = document.getElementById('messages-tbody');
   tbody.innerHTML = '<tr><td colspan="5" class="table-empty">Cargando mensajes...</td></tr>';
 
   supabase.from('contact_messages').select('*').order('created_at', { ascending: false }).then(function (res) {
     if (res.error) {
+      recordLoadTime('messages', t0);
       tbody.innerHTML = '<tr><td colspan="5" class="table-empty">Error cargando mensajes: ' + escapeHtml(res.error.message) + '</td></tr>';
       return;
     }
+    recordLoadTime('messages', t0);
 
     var rows = res.data || [];
     if (rows.length === 0) {
@@ -631,6 +660,7 @@ function loadMessages() {
     }
     tbody.innerHTML = html;
   }).catch(function (err) {
+    recordLoadTime('messages', t0);
     tbody.innerHTML = '<tr><td colspan="5" class="table-empty">Error cargando mensajes: ' + escapeHtml(err && err.message ? err.message : err) + '</td></tr>';
   });
 }
