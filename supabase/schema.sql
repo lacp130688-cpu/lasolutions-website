@@ -34,7 +34,9 @@ create table if not exists public.promotions (
   starts_at timestamptz,
   ends_at timestamptz,
   active boolean not null default true,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  -- Una oferta activa por producto: evita duplicados al re-ejecutar el seed
+  constraint promotions_product_id_key unique (product_id)
 );
 
 -- ------------------------------------------------------------
@@ -55,7 +57,6 @@ create table if not exists public.contact_messages (
 create index if not exists idx_products_category on public.products (category);
 create index if not exists idx_products_active on public.products (active) where active = true;
 create index if not exists idx_promotions_active on public.promotions (active) where active = true;
-create index if not exists idx_promotions_product on public.promotions (product_id);
 create index if not exists idx_contact_messages_created on public.contact_messages (created_at desc);
 
 -- ------------------------------------------------------------
@@ -88,7 +89,65 @@ insert into public.products (id, name, category, brand, price, original_price, d
    '["Intel Core i7-13700H", "32GB DDR5 RAM", "1TB SSD NVMe", "14\" 2K IPS 120Hz"]', 'assets/placeholder.svg', false),
   (9, 'laSolutions Laptop Essential', 'Laptop', 'laSolutions', 599, 599,
    'Laptop accesible para estudios, oficina y uso diario. Excelente relacion precio-calidad.',
-   '["Intel Core i5-1235U", "8GB DDR4 RAM", "256GB SSD", "14\" Full HD"]', 'assets/placeholder.svg', false)
+   '["Intel Core i5-1235U", "8GB DDR4 RAM", "256GB SSD", "14\" Full HD"]', 'assets/placeholder.svg', false),
+  -- Marcas reconocidas: Asus, Dell, HP, Lenovo, MSI, Acer, Apple
+  (10, 'Asus ROG Strix G16', 'Gaming', 'Asus', 1399, 1399,
+   'Laptop gaming con RTX 4060 y pantalla de 16 pulgadas a 165Hz. Rendimiento serio para jugar y crear.',
+   '["Intel Core i7-13650HX", "NVIDIA RTX 4060 8GB", "16GB DDR5 RAM", "1TB SSD NVMe", "16\" 165Hz"]', 'assets/placeholder.svg', true),
+  (11, 'Asus TUF Gaming F15', 'Gaming', 'Asus', 949, 949,
+   'Gaming resistente con certificacion militar, ideal para sesiones largas y uso intensivo.',
+   '["Intel Core i5-12500H", "NVIDIA RTX 3050 6GB", "16GB DDR5 RAM", "512GB SSD NVMe"]', 'assets/placeholder.svg', false),
+  (12, 'Asus VivoBook 15', 'Laptop', 'Asus', 549, 549,
+   'Laptop liviana y compacta para estudio, oficina y uso diario sin complicaciones.',
+   '["AMD Ryzen 5 7520U", "8GB RAM", "512GB SSD", "15.6\" Full HD"]', 'assets/placeholder.svg', false),
+  (13, 'Dell XPS 13', 'Laptop', 'Dell', 1249, 1249,
+   'Ultrabook premium con panel OLED y chassis de aluminio. Diseno que se nota.',
+   '["Intel Core i7-1355U", "16GB RAM", "512GB SSD", "13.4\" OLED"]', 'assets/placeholder.svg', true),
+  (14, 'Dell Alienware m16', 'Gaming', 'Dell', 1899, 1899,
+   'Gaming premium con refrigeracion Cryo-Tech y teclado mecanico para el jugador exigente.',
+   '["Intel Core i9-13900HX", "NVIDIA RTX 4070 8GB", "32GB DDR5 RAM", "1TB SSD NVMe", "16\" QHD 240Hz"]', 'assets/placeholder.svg', false),
+  (15, 'Dell Inspiron 15', 'Laptop', 'Dell', 599, 599,
+   'Laptop confiable para oficina, estudios y entretenimiento. La opcion segura del dia a dia.',
+   '["Intel Core i5-1335U", "8GB RAM", "512GB SSD", "15.6\" Full HD"]', 'assets/placeholder.svg', false),
+  (16, 'Dell OptiPlex Tower', 'Escritorio', 'Dell', 729, 729,
+   'Desktop de oficina confiable con soporte empresarial y facil mantenimiento.',
+   '["Intel Core i5-13500", "16GB DDR4 RAM", "512GB SSD", "Windows 11 Pro"]', 'assets/placeholder.svg', false),
+  (17, 'HP Pavilion 15', 'Laptop', 'HP', 579, 579,
+   'Laptop versatil para el dia a dia con buen rendimiento multimedia y audio nítido.',
+   '["Intel Core i5-1235U", "8GB RAM", "512GB SSD", "15.6\" Full HD"]', 'assets/placeholder.svg', false),
+  (18, 'HP Omen 16', 'Gaming', 'HP', 1249, 1249,
+   'Gaming con refrigeracion eficiente, RGB personalizable y pantalla de alta tasa de refresco.',
+   '["AMD Ryzen 7 7840HS", "NVIDIA RTX 4060 8GB", "16GB DDR5 RAM", "1TB SSD NVMe", "16.1\" 165Hz"]', 'assets/placeholder.svg', false),
+  (19, 'HP Spectre x360', 'Laptop', 'HP', 1499, 1499,
+   'Convertible premium 2-en-1 con pantalla tactil 3K y acabado en dos tonos.',
+   '["Intel Core i7-1355U", "16GB RAM", "1TB SSD", "13.5\" 3K Touch"]', 'assets/placeholder.svg', false),
+  (20, 'HP EliteDesk 800', 'Escritorio', 'HP', 689, 689,
+   'Desktop compacta para entornos profesionales con alto rendimiento por vatio.',
+   '["Intel Core i5-13500", "16GB DDR4 RAM", "512GB SSD", "Windows 11 Pro"]', 'assets/placeholder.svg', false),
+  (21, 'Lenovo Legion 5', 'Gaming', 'Lenovo', 1149, 1149,
+   'Gaming equilibrado con excelente relacion rendimiento-precio y teclado comodo.',
+   '["AMD Ryzen 7 7735HS", "NVIDIA RTX 4060 8GB", "16GB DDR5 RAM", "512GB SSD NVMe", "15.6\" 144Hz"]', 'assets/placeholder.svg', false),
+  (22, 'Lenovo ThinkPad E14', 'Laptop', 'Lenovo', 769, 769,
+   'El clasico de oficina con teclado legendario y chassis resistente a pruebas rigurosas.',
+   '["Intel Core i5-1335U", "16GB RAM", "512GB SSD", "14\" Full HD"]', 'assets/placeholder.svg', false),
+  (23, 'Lenovo IdeaPad 3', 'Laptop', 'Lenovo', 449, 449,
+   'Laptop economica para lo esencial: navegar, estudiar y trabajar sin vueltas.',
+   '["AMD Ryzen 5 5500U", "8GB RAM", "256GB SSD", "15.6\" Full HD"]', 'assets/placeholder.svg', false),
+  (24, 'MSI Katana 15', 'Gaming', 'MSI', 1099, 1099,
+   'Gaming agresivo con pantalla 144Hz y refrigeracion dedicada para largas partidas.',
+   '["Intel Core i7-13620H", "NVIDIA RTX 4060 8GB", "16GB DDR5 RAM", "1TB SSD NVMe", "15.6\" 144Hz"]', 'assets/placeholder.svg', false),
+  (25, 'Acer Nitro V 15', 'Gaming', 'Acer', 849, 849,
+   'Gaming accesible para jugar en 1080p con generoso rendimiento por su precio.',
+   '["Intel Core i5-13420H", "NVIDIA RTX 4050 6GB", "16GB DDR5 RAM", "512GB SSD NVMe", "15.6\" 144Hz"]', 'assets/placeholder.svg', false),
+  (26, 'Acer Swift Go 14', 'Laptop', 'Acer', 749, 749,
+   'Ultrabook liviano con USB4 y bateria para todo el dia. Ideal para viajar.',
+   '["Intel Core i5-13500H", "16GB RAM", "512GB SSD", "14\" OLED"]', 'assets/placeholder.svg', false),
+  (27, 'Apple MacBook Air 13 (M3)', 'Laptop', 'Apple', 1099, 1099,
+   'Ultraportatil con chip M3: silenciosa, sin ventilador y con bateria que dura todo el dia.',
+   '["Apple M3", "8GB memoria unificada", "256GB SSD", "13.6\" Liquid Retina"]', 'assets/placeholder.svg', true),
+  (28, 'Apple MacBook Pro 14 (M3 Pro)', 'Laptop', 'Apple', 1599, 1599,
+   'Potencia pro con chip M3 Pro para creadores, desarrolladores y editores exigentes.',
+   '["Apple M3 Pro", "18GB memoria unificada", "512GB SSD", "14.2\" Liquid Retina XDR"]', 'assets/placeholder.svg', false)
 on conflict (id) do nothing;
 
 -- ------------------------------------------------------------
@@ -98,8 +157,10 @@ insert into public.promotions (product_id, discount, sale_price, label, ends_at)
   (1, 15, 764, 'Oferta de escritorio', now() + interval '2 days 5 hours'),
   (4, 10, 1349, 'Oferta gaming',      now() + interval '1 day 12 hours'),
   (7, 20, 879, 'Oferta laptop',       now() + interval '3 days 8 hours'),
-  (9, 25, 449, 'Oferta laptop',       now() + interval '5 hours 30 minutes')
-on conflict do nothing;
+  (9, 25, 449, 'Oferta laptop',       now() + interval '5 hours 30 minutes'),
+  (11, 10, 854, 'Oferta Asus TUF',    now() + interval '4 days 6 hours'),
+  (23, 15, 382, 'Oferta Lenovo',      now() + interval '1 day 20 hours')
+on conflict (product_id) do nothing;
 
 -- ------------------------------------------------------------
 -- 7. ROW LEVEL SECURITY (RLS)
@@ -108,7 +169,9 @@ alter table public.products         enable row level security;
 alter table public.promotions       enable row level security;
 alter table public.contact_messages enable row level security;
 
--- Productos y promociones: lectura publica (anon), escritura solo owner
+-- Productos y promociones: lectura publica (anon).
+-- NOTA (fase admin): hoy cualquier usuario autenticado puede escribir.
+-- Al implementar el panel de administrador, restringir con rol/claim admin.
 create policy "products public read"
   on public.products for select
   using (true);
@@ -158,6 +221,7 @@ as $$
       'onSale', (pr.sale_price is not null and pr.sale_price < p.price),
       'discount', pr.discount
     )
+    order by p.id
   )
   from public.products p
   left join public.promotions pr
@@ -165,6 +229,54 @@ as $$
    and pr.active = true
    and (pr.starts_at is null or pr.starts_at <= now())
    and (pr.ends_at is null or pr.ends_at > now())
-  where p.active = true
-  order by p.id;
+  where p.active = true;
 $$;
+
+-- ------------------------------------------------------------
+-- 9. PANEL ADMIN: administradores + escritura restringida
+-- ------------------------------------------------------------
+-- Reemplaza la politica "cualquier autenticado escribe" por una
+-- lista explicita de admins (admin_users) + funcion is_admin().
+-- Para agregar otro admin: insert into public.admin_users (user_id)
+-- values ('uuid');  El UUID se ve en Authentication > Users.
+
+create table if not exists public.admin_users (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
+alter table public.admin_users enable row level security;
+
+-- Nadie toca la tabla directo; solo la funcion is_admin() (security definer)
+create policy "admin_users no direct access"
+  on public.admin_users for select
+  using (false);
+
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+as $$
+  select exists (
+    select 1 from public.admin_users
+    where user_id = auth.uid()
+  );
+$$;
+
+drop policy if exists "products owner write" on public.products;
+create policy "products admin write"
+  on public.products for all
+  using (public.is_admin())
+  with check (public.is_admin());
+
+drop policy if exists "promotions owner write" on public.promotions;
+create policy "promotions admin write"
+  on public.promotions for all
+  using (public.is_admin())
+  with check (public.is_admin());
+
+drop policy if exists "contact_messages owner read" on public.contact_messages;
+create policy "contact_messages admin read"
+  on public.contact_messages for select
+  using (public.is_admin());
