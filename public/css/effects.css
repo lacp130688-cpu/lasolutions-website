@@ -1,0 +1,148 @@
+/* ============================================
+   laSolutions - Immersive 3D Effects
+   Hero 3D, tilt cards, orbs, particles
+   ============================================ */
+
+/* ---------- Hero: deep space backdrop ---------- */
+.hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(1200px 600px at 15% -10%, rgba(108, 99, 255, 0.28), transparent 60%),
+    radial-gradient(1000px 520px at 88% 115%, rgba(0, 212, 255, 0.20), transparent 60%),
+    radial-gradient(800px 500px at 70% 20%, rgba(108, 99, 255, 0.10), transparent 60%);
+  animation: auroraDrift 18s ease-in-out infinite alternate;
+}
+
+@keyframes auroraDrift {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(-30px, 18px, 0) scale(1.06); }
+}
+
+/* Particles canvas (injected by effects.js) */
+.hero-particles {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Floating orbs (created by effects.js, moved by rAF) */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(64px);
+  opacity: 0.55;
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform;
+}
+
+/* ---------- Hero visual 3D ---------- */
+.hero-visual {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.hero-visual img {
+  transform: translateZ(60px);
+  animation: heroFloat 6s ease-in-out infinite alternate;
+  transition: filter 0.4s ease;
+}
+
+@keyframes heroFloat {
+  from { transform: translateZ(60px) translateY(0); }
+  to   { transform: translateZ(60px) translateY(-16px); }
+}
+
+/* ---------- 3D tilt cards ---------- */
+.product-card,
+.promo-card {
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+}
+
+.product-card:hover,
+.promo-card:hover {
+  transform: perspective(950px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-6px) scale(1.02);
+}
+
+/* Glare that follows the cursor */
+.product-card::after,
+.promo-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.10), transparent 42%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.product-card:hover::after,
+.promo-card:hover::after {
+  opacity: 1;
+}
+
+/* ---------- 3D pop-out: products rise out of the card ---------- */
+.product-card,
+.promo-card {
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease, border-color 0.35s ease;
+}
+
+.product-card:hover,
+.promo-card:hover {
+  overflow: visible;
+  transform-style: preserve-3d;
+  transform: perspective(950px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-12px) scale(1.04);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.6), var(--shadow-glow-purple);
+  z-index: 10;
+}
+
+.product-card:hover .product-card-image,
+.promo-card:hover .product-card-image {
+  overflow: visible;
+  transform-style: preserve-3d;
+}
+
+.product-card:hover .product-card-image img,
+.promo-card:hover .product-card-image img {
+  transform: translateZ(54px) scale(1.08);
+  filter: drop-shadow(0 28px 26px rgba(0, 0, 0, 0.65));
+  transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.45s ease;
+}
+
+/* ---------- Accessiblity: reduce motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .hero::before,
+  .hero-particles,
+  .orb {
+    display: none !important;
+  }
+
+  .hero-visual img {
+    animation: none !important;
+    transform: translateZ(30px) !important;
+  }
+
+  .product-card,
+  .promo-card,
+  .product-card:hover,
+  .promo-card:hover {
+    transform: none !important;
+    transition: none !important;
+    overflow: hidden;
+  }
+}

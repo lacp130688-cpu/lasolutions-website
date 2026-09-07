@@ -10,6 +10,18 @@ function getBasePath() {
   return '';
 }
 
+// Resolves an image source: absolute URLs (http/https/data) pass through,
+// relative paths get the base path prefix so they work from any page depth
+function resolveImageUrl(img) {
+  if (!img) {
+    img = 'assets/placeholder.svg';
+  }
+  if (/^(https?:)?\/\//.test(img) || img.indexOf('data:') === 0) {
+    return img;
+  }
+  return getBasePath() + img;
+}
+
 // ---------- Mobile Navigation ----------
 document.addEventListener('DOMContentLoaded', function () {
   const hamburger = document.querySelector('.hamburger');
@@ -138,10 +150,11 @@ function openProductModal(productId) {
   modal.innerHTML =
     '<div class="modal">' +
       '<button class="modal-close" onclick="closeProductModal()" aria-label="Cerrar">&times;</button>' +
-      '<div class="modal-image"><img src="' + base + 'assets/placeholder.svg" alt="' + escapeHtml(product.name) + '"></div>' +
+      '<div class="modal-image"><img src="' + resolveImageUrl(product.image) + '" alt="' + escapeHtml(product.name) + '"></div>' +
       '<div class="modal-body">' +
-        '<span class="product-badge ' + badgeClass + '">' + escapeHtml(product.category) + '</span>' +
+'<span class="product-badge ' + badgeClass + '">' + escapeHtml(product.category) + '</span>' +
         '<h2>' + escapeHtml(product.name) + '</h2>' +
+        (product.brand ? '<p style="margin:0.35rem 0;"><span class="product-badge" style="background:rgba(0,212,255,0.12);color:var(--accent);">' + escapeHtml(product.brand) + '</span></p>' : '') +
         '<p style="margin: 0.75rem 0; color: var(--text-secondary);">' + escapeHtml(product.description) + '</p>' +
         specsHtml +
         '<div class="modal-footer">' +

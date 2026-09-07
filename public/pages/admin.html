@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Admin - laSolutions</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/gaming-theme.css">
+  <style>
+    /* ---------- Panel Admin: estilos propios ---------- */
+    .admin-header {
+      background: rgba(15, 14, 23, 0.9);
+      border-bottom: 1px solid rgba(108, 99, 255, 0.25);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+      padding: 1rem 0;
+    }
+    .admin-header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .admin-header-title {
+      font-size: 1.1rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin: 0;
+    }
+
+    /* Login centrado tipo card */
+    #login-view {
+      min-height: calc(100vh - 72px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--surface);
+      border: 1px solid rgba(108, 99, 255, 0.25);
+      border-radius: var(--radius-card);
+      box-shadow: 0 0 30px rgba(0, 212, 255, 0.08), 0 10px 40px rgba(0, 0, 0, 0.5);
+      padding: 2.5rem 2rem;
+    }
+    .login-card .section-title {
+      margin-bottom: 1.5rem;
+    }
+    .login-hint {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      margin-top: 0.9rem;
+    }
+
+    /* Panel */
+    #panel-view {
+      padding: 2rem 0 4rem;
+      max-width: var(--max-width);
+      width: 90%;
+      margin: 0 auto;
+    }
+    .admin-panel-error {
+      display: none;
+      color: var(--error);
+      background: rgba(255, 82, 82, 0.1);
+      border: 1px solid rgba(255, 82, 82, 0.35);
+      border-radius: var(--radius-btn);
+      padding: 0.8rem 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+    .admin-tabs {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .admin-tab {
+      background: transparent;
+      border: 1px solid rgba(108, 99, 255, 0.35);
+      color: var(--text-secondary);
+      padding: 0.55rem 1.3rem;
+      border-radius: var(--radius-btn);
+      cursor: pointer;
+      font-family: var(--font-heading);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: all var(--transition);
+    }
+    .admin-tab:hover {
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .admin-tab.active {
+      background: linear-gradient(135deg, var(--primary), #8B7FFF);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: var(--shadow-glow-purple);
+    }
+    .admin-tab-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.5rem;
+    }
+    .admin-panel-title {
+      margin: 0;
+      text-align: left;
+    }
+    .admin-panel-title::after {
+      margin: 0.5rem 0 0;
+    }
+
+    /* Tablas */
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 1rem;
+    }
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid rgba(108, 99, 255, 0.25);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+    }
+    .admin-table th {
+      background: rgba(108, 99, 255, 0.18);
+      color: var(--accent);
+      font-family: var(--font-heading);
+      font-size: 0.72rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 0.75rem 0.9rem;
+      text-align: left;
+      white-space: nowrap;
+    }
+    .admin-table td {
+      padding: 0.7rem 0.9rem;
+      border-top: 1px solid rgba(108, 99, 255, 0.15);
+      vertical-align: middle;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+    }
+    .admin-table tbody tr:hover td {
+      background: rgba(108, 99, 255, 0.08);
+    }
+    .thumb {
+      width: 48px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid rgba(108, 99, 255, 0.35);
+      background: var(--bg);
+    }
+    .table-empty {
+      text-align: center;
+      color: var(--text-secondary);
+      padding: 2rem !important;
+    }
+    .table-actions {
+      white-space: nowrap;
+    }
+
+    /* Formularios */
+    .admin-form {
+      margin-top: 1.5rem;
+      padding: 1.5rem;
+      background: var(--surface);
+      border: 1px solid rgba(108, 99, 255, 0.25);
+      border-radius: var(--radius-card);
+    }
+    .admin-form h3 {
+      margin-bottom: 1rem;
+      color: var(--accent);
+      font-size: 1rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .admin-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 1.25rem;
+    }
+    .admin-form-grid .full {
+      grid-column: 1 / -1;
+    }
+    .admin-form label {
+      display: block;
+      margin: 0.75rem 0 0.3rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .admin-input {
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      background: var(--bg);
+      color: var(--text-primary);
+      border: 1px solid rgba(108, 99, 255, 0.25);
+      border-radius: var(--radius-btn);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      transition: all var(--transition);
+    }
+    .admin-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.15);
+    }
+    .admin-input[type="file"] {
+      padding: 0.45rem;
+      color: var(--text-secondary);
+    }
+    .admin-check {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .admin-check input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    .admin-check label {
+      margin: 0;
+      cursor: pointer;
+      text-transform: none;
+      letter-spacing: 0;
+      color: var(--text-primary);
+    }
+    .admin-form-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+    #product-image-preview {
+      max-width: 180px;
+      max-height: 120px;
+      margin-top: 0.75rem;
+      border: 1px solid rgba(108, 99, 255, 0.35);
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .login-error {
+      color: var(--error);
+      font-size: 0.85rem;
+      margin: 0.9rem 0 0;
+      min-height: 1.2em;
+    }
+
+    @media (max-width: 640px) {
+      .admin-form-grid {
+        grid-template-columns: 1fr;
+      }
+      .admin-header-inner {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header propio del panel -->
+  <header class="admin-header">
+    <div class="container admin-header-inner">
+      <a href="../index.html" class="nav-logo">la<span>Solutions</span></a>
+      <h1 class="admin-header-title">Panel Admin</h1>
+      <button type="button" class="btn btn-danger btn-sm" id="btn-logout" style="display:none;" onclick="adminLogout()">Salir</button>
+    </div>
+  </header>
+
+  <!-- Vista de login -->
+  <section id="login-view">
+    <div class="login-card">
+      <h2 class="section-title">Acceso al panel</h2>
+      <label for="login-email">Email</label>
+      <input type="email" id="login-email" class="admin-input" placeholder="admin@lasolutions.com">
+      <label for="login-password">Password</label>
+      <input type="password" id="login-password" class="admin-input">
+      <p class="login-error" id="login-error"></p>
+      <button type="button" class="btn btn-primary" style="width:100%;" onclick="adminLogin()">Entrar</button>
+      <p class="login-hint">Solo usuarios administradores pueden ingresar.</p>
+    </div>
+  </section>
+
+  <!-- Vista del panel (oculta hasta login + verificacion admin) -->
+  <main id="panel-view" style="display:none;">
+    <p class="admin-panel-error" id="panel-error"></p>
+
+    <nav class="admin-tabs">
+      <button type="button" class="admin-tab active" data-tab="products" onclick="showTab('products')">Productos</button>
+      <button type="button" class="admin-tab" data-tab="promos" onclick="showTab('promos')">Promociones</button>
+      <button type="button" class="admin-tab" data-tab="messages" onclick="showTab('messages')">Mensajes</button>
+    </nav>
+
+    <!-- Tab Productos -->
+    <section id="tab-products" class="admin-tab-panel">
+      <div class="admin-tab-head">
+        <h2 class="section-title admin-panel-title">Productos</h2>
+        <button type="button" class="btn btn-accent" onclick="newProductForm()">Nuevo producto</button>
+      </div>
+
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Imagen</th>
+              <th>Nombre</th>
+              <th>Marca</th>
+              <th>Precio</th>
+              <th>Destacado</th>
+              <th>Activo</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="products-tbody">
+            <tr><td colspan="8" class="table-empty">Cargando productos...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="admin-form" id="product-form" style="display:none;">
+        <h3 id="product-form-title">Nuevo producto</h3>
+        <input type="hidden" id="product-id" value="">
+        <div class="admin-form-grid">
+          <div>
+            <label for="product-name">Nombre *</label>
+            <input type="text" id="product-name" class="admin-input">
+          </div>
+          <div>
+            <label for="product-category">Categoria</label>
+            <select id="product-category" class="admin-input">
+              <option value="Escritorio">Escritorio</option>
+              <option value="Gaming">Gaming</option>
+              <option value="Laptop">Laptop</option>
+            </select>
+          </div>
+          <div>
+            <label for="product-brand">Marca</label>
+            <input type="text" id="product-brand" class="admin-input" placeholder="laSolutions">
+          </div>
+          <div>
+            <label for="product-price">Precio *</label>
+            <input type="number" id="product-price" class="admin-input" min="0" step="0.01" placeholder="0.00">
+          </div>
+          <div>
+            <label for="product-original-price">Precio original (antes)</label>
+            <input type="number" id="product-original-price" class="admin-input" min="0" step="0.01" placeholder="Opcional">
+          </div>
+          <div class="full">
+            <label for="product-description">Descripcion</label>
+            <textarea id="product-description" class="admin-input" rows="3"></textarea>
+          </div>
+          <div class="full">
+            <label for="product-specs">Specs (lista JSON opcional)</label>
+            <textarea id="product-specs" class="admin-input" rows="2" placeholder='["16GB RAM","1TB SSD"]'></textarea>
+          </div>
+          <div>
+            <label for="product-image-url">URL de imagen</label>
+            <input type="text" id="product-image-url" class="admin-input" placeholder="https://... o assets/placeholder.svg" onchange="onProductImageUrlChange()">
+          </div>
+          <div>
+            <label for="product-image-file">O subir imagen (max 2MB)</label>
+            <input type="file" id="product-image-file" class="admin-input" accept="image/jpeg,image/png,image/webp,image/gif">
+          </div>
+        </div>
+        <img id="product-image-preview" alt="Preview de imagen" style="display:none;">
+        <div class="admin-check">
+          <input type="checkbox" id="product-featured">
+          <label for="product-featured">Destacado</label>
+        </div>
+        <div class="admin-check">
+          <input type="checkbox" id="product-active" checked>
+          <label for="product-active">Activo</label>
+        </div>
+        <div class="admin-form-actions">
+          <button type="button" class="btn btn-primary" onclick="saveProduct()">Guardar</button>
+          <button type="button" class="btn btn-outline" onclick="cancelProductForm()">Cancelar</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab Promociones -->
+    <section id="tab-promos" class="admin-tab-panel" style="display:none;">
+      <div class="admin-tab-head">
+        <h2 class="section-title admin-panel-title">Promociones</h2>
+        <button type="button" class="btn btn-accent" onclick="newPromoForm()">Nueva promocion</button>
+      </div>
+
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Descuento</th>
+              <th>Precio oferta</th>
+              <th>Label</th>
+              <th>Activa</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="promos-tbody">
+            <tr><td colspan="6" class="table-empty">Cargando promociones...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="admin-form" id="promo-form" style="display:none;">
+        <h3 id="promo-form-title">Nueva promocion</h3>
+        <input type="hidden" id="promo-id" value="">
+        <div class="admin-form-grid">
+          <div>
+            <label for="promo-product-id">Producto</label>
+            <select id="promo-product-id" class="admin-input"></select>
+          </div>
+          <div>
+            <label for="promo-discount">Descuento %</label>
+            <input type="number" id="promo-discount" class="admin-input" min="1" max="99" placeholder="15">
+          </div>
+          <div>
+            <label for="promo-sale-price">Precio de oferta</label>
+            <input type="number" id="promo-sale-price" class="admin-input" min="0" step="0.01" placeholder="0.00">
+          </div>
+          <div>
+            <label for="promo-label">Label</label>
+            <input type="text" id="promo-label" class="admin-input" placeholder="Oferta">
+          </div>
+        </div>
+        <div class="admin-check">
+          <input type="checkbox" id="promo-active" checked>
+          <label for="promo-active">Activa</label>
+        </div>
+        <div class="admin-form-actions">
+          <button type="button" class="btn btn-primary" onclick="savePromotion()">Guardar</button>
+          <button type="button" class="btn btn-outline" onclick="cancelPromoForm()">Cancelar</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab Mensajes -->
+    <section id="tab-messages" class="admin-tab-panel" style="display:none;">
+      <div class="admin-tab-head">
+        <h2 class="section-title admin-panel-title">Mensajes</h2>
+      </div>
+
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Asunto</th>
+              <th>Mensaje</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody id="messages-tbody">
+            <tr><td colspan="5" class="table-empty">Cargando mensajes...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Scripts: CDN de Supabase, config, luego admin.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-config.js"></script>
+  <script src="../js/admin.js"></script>
+
+</body>
+</html>

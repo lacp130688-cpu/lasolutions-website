@@ -8,16 +8,62 @@ var PRODUCTS = [];
 var PRODUCTS_LOADED = false;
 
 // ---------- Load data from Supabase ----------
+function isSupabaseConfigured() {
+  return !!(
+    window.SUPABASE_URL &&
+    window.SUPABASE_URL.indexOf('TU-PROYECTO') === -1 &&
+    window.SUPABASE_ANON_KEY &&
+    window.SUPABASE_ANON_KEY.indexOf('TU-ANON-KEY') === -1
+  );
+}
+
+// Datos locales (ejemplos) mientras Supabase no este configurado
+function loadFallbackData() {
+  PRODUCTS = (window.FALLBACK_PRODUCTS || []).map(function (p) {
+    return {
+      id: p.id,
+      name: p.name,
+      category: p.category,
+      brand: p.brand,
+      price: p.price,
+      originalPrice: p.originalPrice,
+      description: p.description,
+      specs: (p.specs || []).slice(),
+      image: p.image || 'assets/placeholder.svg',
+      onSale: p.onSale === true,
+      discount: p.discount || 0,
+      featured: p.featured === true
+    };
+  });
+  window.PROMOTIONS = (window.FALLBACK_PROMOTIONS || []).map(function (p) {
+    return { productId: p.productId, discount: p.discount, salePrice: p.salePrice, endDate: p.endDate, label: p.label || '' };
+  });
+  PRODUCTS_LOADED = true;
+}
+
 function loadSiteData() {
   if (PRODUCTS_LOADED) return Promise.resolve(PRODUCTS);
 
-  return Promise.all([
-    supabase.from('products').select('*').eq('active', true).order('id'),
-    supabase.from('promotions').select('*').eq('active', true)
-  ])
+  try {
+    // Sin credenciales reales o SDK sin cargar: usar los productos ficticios de ejemplo
+    if (!isSupabaseConfigured() || !window.supabase) {
+      loadFallbackData();
+      return Promise.resolve(PRODUCTS);
+    }
+
+    return Promise.all([
+      supabase.from('products').select('*').eq('active', true).order('id'),
+      supabase.from('promotions').select('*').eq('active', true)
+    ])
     .then(function (results) {
       var productsRows = results[0].data || [];
       var promoRows = results[1].data || [];
+
+      // Sin datos en la base: caer a los ejemplos locales
+      if (!productsRows.length) {
+        loadFallbackData();
+        return PRODUCTS;
+      }
 
       // Build legacy PROMOTIONS array
       // Postgres numeric viene como string: se convierte con Number()
@@ -71,11 +117,16 @@ function loadSiteData() {
       return PRODUCTS;
     })
     .catch(function (err) {
-      console.error('Error cargando datos:', err);
-      PRODUCTS = [];
-      window.PROMOTIONS = [];
+      console.error('Error cargando datos de Supabase, usando datos locales:', err);
+      loadFallbackData();
       return PRODUCTS;
     });
+  } catch (err) {
+    // Defensa final: ningun error sincronico puede dejar la pagina vacia
+    console.error('Error inesperado en loadSiteData, usando respaldo:', err);
+    loadFallbackData();
+    return Promise.resolve(PRODUCTS);
+  }
 }
 
 // ---------- State ----------
@@ -150,7 +201,6 @@ function getFilteredProducts() {
 
 // ---------- Rendering ----------
 function renderProductCard(product) {
-  var base = typeof getBasePath === 'function' ? getBasePath() : '';
   var badgeClass = getBadgeClass(product.category);
   var hasPromo = product.originalPrice > product.price;
   var priceHtml = '';
@@ -170,7 +220,7 @@ function renderProductCard(product) {
 
   return '<div class="product-card" onclick="openProductModal(' + product.id + ')">' +
     '<div class="product-card-image">' +
-      '<img src="' + base + product.image + '" alt="' + escapeHtml(product.name) + '" loading="lazy">' +
+      '<img src="' + resolveImageUrl(product.image) + '" alt="' + escapeHtml(product.name) + '" loading="lazy">' +
     '</div>' +
     '<div class="product-card-body">' +
       badgeHtml +
@@ -203,8 +253,27 @@ function renderCatalog() {
   grid.innerHTML = products.map(renderProductCard).join('');
 }
 
+// ---------- Render brand filters dynamically from loaded data ----------
+function renderBrandFilters() {
+  var list = document.getElementById('brand-list');
+  if (!list) return;
+
+  var brands = [];
+  PRODUCTS.forEach(function (p) {
+    if (p.brand && brands.indexOf(p.brand) === -1) brands.push(p.brand);
+  });
+  brands.sort(function (a, b) { return a.localeCompare(b); });
+
+  list.innerHTML = brands.map(function (b) {
+    return '<label><input type="checkbox" data-filter-type="brand" value="' + escapeHtml(b) + '"> ' + escapeHtml(b) + '</label>';
+  }).join('');
+}
+
 // ---------- Event Handlers ----------
 function initCatalog() {
+  // Brand filters are generated from the loaded products (Supabase or fallback)
+  renderBrandFilters();
+
   // Search
   var searchInput = document.getElementById('catalog-search');
   if (searchInput) {
@@ -280,4 +349,86 @@ function renderFeaturedProducts() {
   var featured = PRODUCTS.filter(function (p) { return p.featured === true; });
 
   grid.innerHTML = featured.map(renderProductCard).join('');
+}
+
+// ---------- Brands marquee (Home page) ----------
+function renderBrandsStrip() {
+  var track = document.getElementById('brands-strip');
+  if (!track) return;
+
+  var brands = [];
+  PRODUCTS.forEach(function (p) {
+    // Solo marcas de terceros: la marca propia ya esta en el logo del sitio
+    if (!p.brand || p.brand === 'laSolutions') return;
+    if (brands.indexOf(p.brand) === -1) brands.push(p.brand);
+  });
+  brands.sort(function (a, b) { return a.localeCompare(b); });
+
+  var chips = brands.map(function (b) {
+    return '<div class="brand-chip" title="' + escapeHtml(b) + '">' + escapeHtml(b) + '</div>';
+  }).join('');
+
+  // Set duplicado para el loop infinito del marquee (translateX -50%)
+  track.innerHTML = chips + chips;
+}
+
+// ---------- Featured carousel (Home page) ----------
+function scrollCarousel(direction) {
+  var track = document.getElementById('featured-grid');
+  if (!track) return;
+
+  var card = track.querySelector('.product-card');
+  var step = card ? card.getBoundingClientRect().width + 32 : 360;
+  track.scrollBy({ left: direction * step, behavior: 'smooth' });
+}
+
+function initFeaturedCarousel() {
+  var track = document.getElementById('featured-grid');
+  if (!track || !track.classList.contains('featured-carousel')) return;
+
+  // Flechas: atenuar en los extremos
+  track.addEventListener('scroll', function () {
+    var prev = document.querySelector('.carousel-prev');
+    var next = document.querySelector('.carousel-next');
+    if (prev) prev.style.opacity = track.scrollLeft > 10 ? '1' : '0.35';
+    if (next) next.style.opacity = track.scrollLeft + track.clientWidth >= track.scrollWidth - 10 ? '0.35' : '1';
+  }, { passive: true });
+
+  // Auto-play: avanza cada 4s, vuelve al inicio al llegar al final.
+  // Pausa con el mouse encima o al tocar; se reanuda al salir.
+  var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reducedMotion) return;
+
+  var AUTO_MS = 4000;
+  var timer = null;
+
+  function step() {
+    if (document.hidden) return;
+    var atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 10;
+    if (atEnd) {
+      track.scrollTo({ left: 0, behavior: 'smooth' });
+      return;
+    }
+    var card = track.querySelector('.product-card');
+    var stepPx = card ? card.getBoundingClientRect().width + 32 : 360;
+    track.scrollBy({ left: stepPx, behavior: 'smooth' });
+  }
+
+  function startAuto() {
+    stopAuto();
+    timer = setInterval(step, AUTO_MS);
+  }
+
+  function stopAuto() {
+    if (timer) { clearInterval(timer); timer = null; }
+  }
+
+  // Interaccion manual (scroll, hover, touch) reinicia el timer
+  track.addEventListener('scroll', startAuto, { passive: true });
+  track.addEventListener('mouseenter', stopAuto);
+  track.addEventListener('mouseleave', startAuto);
+  track.addEventListener('touchstart', stopAuto, { passive: true });
+  track.addEventListener('touchend', startAuto, { passive: true });
+
+  startAuto();
 }

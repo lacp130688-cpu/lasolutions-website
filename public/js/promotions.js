@@ -107,7 +107,7 @@ function renderPromotionsPage() {
         '</div>' +
       '</div>' +
       '<div class="promo-card-image" style="border-radius:var(--radius-card);">' +
-        '<img src="' + base + 'assets/placeholder.svg" alt="' + escapeHtml(dealProduct.name) + '">' +
+        '<img src="' + resolveImageUrl(dealProduct.image) + '" alt="' + escapeHtml(dealProduct.name) + '">' +
       '</div>';
   }
 
@@ -124,7 +124,7 @@ function renderPromotionsPage() {
       html +=
         '<div class="promo-card">' +
           '<div class="promo-card-image">' +
-            '<img src="' + base + 'assets/placeholder.svg" alt="' + escapeHtml(product.name) + '" loading="lazy">' +
+            '<img src="' + resolveImageUrl(product.image) + '" alt="' + escapeHtml(product.name) + '" loading="lazy">' +
           '</div>' +
           '<div class="promo-card-body">' +
             '<span class="promo-discount">-' + promo.discount + '% OFF</span>' +
