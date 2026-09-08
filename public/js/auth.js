@@ -101,16 +101,16 @@ function onAuthChange(callback) {
   });
 }
 
-// Login with Microsoft (OAuth via Supabase)
-function loginWithMicrosoft() {
+// Login with Google (OAuth via Supabase)
+function loginWithGoogle() {
   if (!supabase || !supabase.auth || typeof supabase.auth.signInWithOAuth !== 'function') {
-    alert('El login con Microsoft no esta disponible ahora. Intenta de nuevo.');
+    alert('El login con Google no esta disponible ahora. Intenta de nuevo.');
     return;
   }
   return supabase.auth.signInWithOAuth({
-    provider: 'microsoft',
+    provider: 'google',
     options: { redirectTo: window.location.href }
   }).catch(function (err) {
-    alert('No se pudo iniciar con Microsoft: ' + (err && err.message ? err.message : 'error desconocido'));
+    alert('No se pudo iniciar con Google: ' + (err && err.message ? err.message : 'error desconocido'));
   });
 }
