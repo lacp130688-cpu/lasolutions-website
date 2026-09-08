@@ -1,127 +1,127 @@
-# laSolutions Website — Architecture Diagrams
+# laSolutions Website — Diagramas de arquitectura
 
-Diagrams for the laSolutions storefront (vanilla HTML/CSS/JS + Supabase +
-Netlify). Three views: flows, components, and sequences.
+Diagramas de la tienda laSolutions (HTML/CSS/JS vanilla + Supabase +
+Netlify). Tres vistas: flujos, componentes y secuencias.
 
-**How to view:** GitHub renders Mermaid blocks natively. Locally, use VS Code
-with *Markdown Preview Mermaid Support* + *Markmap* extensions, or paste the
-Mermaid blocks into <https://mermaid.live>.
+**Como verlos:** GitHub renderiza los bloques Mermaid de forma nativa. De
+forma local, usa VS Code con las extensiones *Markdown Preview Mermaid
+Support* y *Markmap*, o pega los bloques Mermaid en <https://mermaid.live>.
 
 ---
 
-## Project map (markmap)
+## Mapa del proyecto (markmap)
 
 ````markmap
-# laSolutions Website
+# Sitio laSolutions
 ## Frontend (public/)
-### Pages
+### Paginas
 - index · catalog · promotions · admin · about · contact · login · register
-### Shared JS modules
-- supabase-config: client factory (+ fallback)
-- app: nav, shared helpers, resolveImageUrl
-- auth: Supabase Auth session flow
-- catalog: loadSiteData, render, carousel, brands marquee
-- promotions: promo cards + countdowns
-- data-fallback: local mirror (28 products, 6 promos)
+### Modulos JS compartidos
+- supabase-config: fabrica del cliente (+ respaldo)
+- app: navegacion, helpers compartidos, resolveImageUrl
+- auth: flujo de sesion con Supabase Auth
+- catalog: loadSiteData, render, carrusel, marquesina de marcas
+- promotions: tarjetas de ofertas + cuenta regresiva
+- data-fallback: espejo local (28 productos, 6 ofertas)
 - contact: submitContactMessage
-- admin: panel (CRUD + messages + image upload)
-- effects: 3D pop-out + floating hero
+- admin: panel (CRUD + mensajes + subida de imagenes)
+- effects: pop-out 3D + hero flotante
 ### CSS
 - style · gaming-theme · effects
 ## Backend (Supabase)
 ### Postgres (schema.sql)
 - products · promotions · contact_messages · admin_users
-- is_admin() SECURITY DEFINER · RLS admin-only writes
+- is_admin() SECURITY DEFINER · RLS solo-admin para escrituras
 ### Auth
-- sign up / login / sessions
+- registro / inicio de sesion / sesiones
 ### Storage
-- product-images bucket (public read, admin write)
+- bucket product-images (lectura publica, escritura admin)
 ## Hosting
-- Netlify static from /public · auto-deploy from GitHub master
+- Netlify estatico desde /public · auto-deploy desde GitHub master
 ## Docs
 - openspec (config, project, changes)
 ````
 
 ---
 
-## Flows
+## Flujos
 
-### Public page load with resilient fallback
+### Carga de pagina publica con respaldo resiliente
 
 ```mermaid
 flowchart TD
-  A[Browser opens page] --> B[jsdelivr serves supabase-js v2]
-  B --> C{SDK global available?}
+  A[El navegador abre la pagina] --> B[jsdelivr entrega supabase-js v2]
+  B --> C{Existe el SDK global?}
   C -- no --> D[window.supabase = null]
-  C -- yes --> E[createClient URL + publishable key]
-  E --> F[window.supabase = real client]
-  D --> G[loadSiteData checks client]
+  C -- si --> E[createClient URL + key publicable]
+  E --> F[window.supabase = cliente real]
+  D --> G[loadSiteData verifica el cliente]
   F --> G
-  G --> H{Client ready?}
-  H -- no --> I[Use data-fallback local data]
-  H -- yes --> J[Fetch products + promotions]
-  J --> K{Query error?}
-  K -- yes --> I
-  K -- no --> L[Render grid, carousel, brands marquee]
+  G --> H{Cliente listo?}
+  H -- no --> I[Usar datos locales de data-fallback]
+  H -- si --> J[Consultar productos + ofertas]
+  J --> K{Error en la consulta?}
+  K -- si --> I
+  K -- no --> L[Renderizar grilla, carrusel, marquesina]
   I --> L
-  L --> M[Any error falls back, page never empty]
+  L --> M[Cualquier error cae al respaldo; la pagina nunca queda vacia]
 ```
 
-### Admin login and panel access
+### Login de administrador y acceso al panel
 
 ```mermaid
 flowchart TD
-  A[Open pages/admin.html] --> B[initAdmin]
+  A[Abrir pages/admin.html] --> B[initAdmin]
   B --> C[auth.getSession]
-  C --> D{Active session?}
-  D -- no --> E[Show login form]
-  D -- yes --> F[rpc is_admin]
-  F --> G{Is admin?}
-  G -- yes --> H[Show panel: products / promos / messages]
-  G -- no --> I[Show login + denied message]
-  E --> J[Admin enters credentials]
+  C --> D{Sesion activa?}
+  D -- no --> E[Mostrar formulario de login]
+  D -- si --> F[rpc is_admin]
+  F --> G{Es admin?}
+  G -- si --> H[Mostrar panel: productos / ofertas / mensajes]
+  G -- no --> I[Mostrar login + mensaje de denegado]
+  E --> J[El admin ingresa credenciales]
   J --> K[signInWithPassword]
-  K --> L{Ok?}
-  L -- error --> M[Show error on screen]
+  K --> L{Correcto?}
+  L -- error --> M[Mostrar error en pantalla]
   L -- ok --> F
 ```
 
-### Product creation with optional image upload
+### Creacion de producto con subida de imagen opcional
 
 ```mermaid
 flowchart TD
-  A[Nuevo producto button] --> B[newProductForm]
-  B --> C[Fill fields, optional image file]
-  C --> D[saveProduct: validate name + price]
-  D --> E{Image file chosen?}
-  E -- yes --> F[Validate MIME + max 2MB]
-  F --> G{Valid?}
-  G -- no --> H[Show error, abort]
-  G -- yes --> I[Upload file to Storage bucket product-images]
-  I --> J{Upload ok?}
+  A[Boton Nuevo producto] --> B[newProductForm]
+  B --> C[Completar campos + imagen opcional]
+  C --> D[saveProduct: validar nombre + precio]
+  D --> E{Se eligio archivo de imagen?}
+  E -- si --> F[Validar MIME + maximo 2MB]
+  F --> G{Valido?}
+  G -- no --> H[Mostrar error y abortar]
+  G -- si --> I[Subir archivo al bucket product-images]
+  I --> J{Subida correcta?}
   J -- no --> H
-  J -- yes --> K[Build public Storage URL]
-  E -- no --> L[Use URL field or placeholder]
-  K --> M[persistProduct: insert or update]
+  J -- si --> K[Construir URL publica de Storage]
+  E -- no --> L[Usar URL del campo o placeholder]
+  K --> M[persistProduct: insert o update]
   L --> M
-  M --> N{DB ok?}
-  N -- no --> O[Show error on screen]
-  N -- yes --> P[Reload products table]
+  M --> N{Base correcta?}
+  N -- no --> O[Mostrar error en pantalla]
+  N -- si --> P[Recargar tabla de productos]
 ```
 
 ---
 
-## Components
+## Componentes
 
 ```mermaid
 flowchart LR
-  subgraph Browser[Browser]
+  subgraph Navegador[Navegador]
     A[index / catalog / promotions]
     B[admin]
     C[about / contact / login / register]
   end
 
-  subgraph JS[JS modules]
+  subgraph JS[Modulos JS]
     D[supabase-config]
     E[app]
     F[auth]
@@ -139,8 +139,8 @@ flowchart LR
     O[Storage product-images]
   end
 
-  P[Netlify static hosting]
-  Q[jsdelivr CDN]
+  P[Hosting estatico Netlify]
+  Q[CDN jsdelivr]
 
   P --> A
   P --> B
@@ -154,74 +154,74 @@ flowchart LR
   K --> O
   F --> M
   J --> N
-  G -. fallback .-> H
+  G -. respaldo .-> H
 ```
 
-## Sequences
+## Secuencias
 
-### Public catalog load
+### Carga del catalogo publico
 
 ```mermaid
 sequenceDiagram
-  participant Page as Page browser
-  participant CDN as jsdelivr CDN
+  participant Page as Navegador de la pagina
+  participant CDN as CDN jsdelivr
   participant SB as Supabase
   participant FB as data-fallback.js
-  Page->>CDN: load supabase-js@2
-  CDN-->>Page: UMD global (module container)
-  Page->>Page: supabase-config always builds real client
-  Page->>SB: loadSiteData: products + promotions
-  alt CDN failure or query error
-    Page->>FB: read local datasets
-    FB-->>Page: 28 products, 6 promotions
+  Page->>CDN: cargar supabase-js@2
+  CDN-->>Page: global UMD (contenedor del modulo)
+  Page->>Page: supabase-config siempre crea el cliente real
+  Page->>SB: loadSiteData: productos + ofertas
+  alt fallo del CDN o error de consulta
+    Page->>FB: leer datos locales
+    FB-->>Page: 28 productos, 6 ofertas
   end
-  Page->>Page: render grid, carousel, brands marquee
+  Page->>Page: renderizar grilla, carrusel, marquesina
 ```
 
-### Admin login and authorization
+### Login de administrador y autorizacion
 
 ```mermaid
 sequenceDiagram
-  participant Admin as Admin browser
+  participant Admin as Navegador del admin
   participant P as admin.js
   participant Auth as Supabase Auth
   participant DB as Postgres RLS
-  Admin->>P: open pages/admin.html
+  Admin->>P: abrir pages/admin.html
   P->>Auth: getSession()
-  alt no session
-    Admin->>P: enter email + password
+  alt sin sesion
+    Admin->>P: ingresar email + password
     P->>Auth: signInWithPassword()
-    Auth-->>P: session token
+    Auth-->>P: token de sesion
   end
   P->>DB: rpc is_admin()
   DB-->>P: true | false
-  alt is admin
-    P->>DB: load products, promos, messages
-    DB-->>P: rows
-  else not admin
-    P-->>Admin: denied message on login
+  alt es admin
+    P->>DB: cargar productos, ofertas, mensajes
+    DB-->>P: filas
+  else no es admin
+    P-->>Admin: mensaje de denegado en el login
   end
 ```
 
-### Product creation with image upload
+### Creacion de producto con subida de imagen
 
 ```mermaid
 sequenceDiagram
-  participant Admin as Admin browser
+  participant Admin as Navegador del admin
   participant P as admin.js
-  participant St as Supabase Storage
-  participant DB as products table
-  P->>P: saveProduct validates name/price
-  alt image file selected
-    P->>St: upload to product-images
-    St-->>P: public object URL
+  participant St as Storage de Supabase
+  participant DB as tabla products
+  P->>P: saveProduct valida nombre y precio
+  alt se selecciono archivo de imagen
+    P->>St: subir a product-images
+    St-->>P: URL publica del objeto
   end
-  P->>DB: insert product row
-  DB-->>P: success | RLS/constraint error
-  alt success
-    P->>DB: reload products list
-    DB-->>P: updated rows
+  P->>DB: insertar fila de producto
+  DB-->>P: exito | error de RLS o constraint
+  alt exito
+    P->>DB: recargar lista de productos
+    DB-->>P: filas actualizadas
   else error
-    P-->>Admin: error visible on screen
+    P-->>Admin: error visible en pantalla
   end
 ```
