@@ -80,6 +80,41 @@
       </div>
       <button type="button" class="btn btn-outline" style="width:100%;margin-top:0.5rem;" onclick="loginWithGoogle()">Registrarse con Google</button>
 
+      <div style="display:flex;align-items:center;gap:0.75rem;margin:1.25rem 0 0.25rem;color:var(--text-secondary);font-size:0.85rem;">
+        <span style="flex:1;height:1px;background:#343b4b;"></span>o<span style="flex:1;height:1px;background:#343b4b;"></span>
+      </div>
+      <button type="button" class="btn btn-outline" style="width:100%;margin-top:0.5rem;" onclick="localTogglePanel('local-register-panel')">Crear cuenta local</button>
+
+      <div id="local-register-panel" class="auth-card" style="display:none;margin-top:1rem;padding:1rem;box-shadow:none;">
+        <h3 style="margin:0 0 0.75rem;font-size:1rem;">Cuenta local (sin servicios)</h3>
+        <div class="alert alert-error" id="local-reg-error"></div>
+
+        <div id="local-reg-step1">
+          <div class="form-group">
+            <label for="local-reg-name">Nombre completo</label>
+            <input type="text" id="local-reg-name" placeholder="Tu nombre">
+          </div>
+          <div class="form-group">
+            <label for="local-reg-email">Correo electronico</label>
+            <input type="email" id="local-reg-email" placeholder="tu@email.com">
+          </div>
+          <div class="form-group">
+            <label for="local-reg-password">Contrasena</label>
+            <input type="password" id="local-reg-password" placeholder="Minimo 6 caracteres">
+          </div>
+          <button type="button" class="btn btn-primary auth-submit" onclick="localRegisterSubmit()">Crear cuenta local</button>
+        </div>
+
+        <div id="local-reg-step2" style="display:none;margin-top:0.5rem;padding-top:1rem;border-top:1px solid #343b4b;">
+          <div class="alert alert-success" id="local-reg-code"></div>
+          <div class="form-group" style="margin-bottom:0.5rem;">
+            <label for="local-reg-verify-code">Codigo de verificacion</label>
+            <input type="text" id="local-reg-verify-code" maxlength="6" inputmode="numeric" placeholder="6 digitos">
+          </div>
+          <button type="button" class="btn btn-outline auth-submit" onclick="localVerifyFromRegister()">Verificar y crear cuenta</button>
+        </div>
+      </div>
+
       <div class="auth-footer">
         Ya tienes cuenta? <a href="login.html">Inicia sesion</a> · <a href="admin.html">Admin</a>
       </div>
@@ -91,6 +126,7 @@
   <script src="../js/supabase-config.js"></script>
   <script src="../js/app.js"></script>
   <script src="../js/auth.js"></script>
+  <script src="../js/auth-local.js"></script>
   <script src="../js/effects.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', async function () {
