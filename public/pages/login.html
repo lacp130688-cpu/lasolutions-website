@@ -61,10 +61,15 @@
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary auth-submit">Iniciar sesion</button>
+<button type="submit" class="btn btn-primary auth-submit">Iniciar sesion</button>
       </form>
 
-<div class="auth-footer">
+      <div style="display:flex;align-items:center;gap:0.75rem;margin:1.25rem 0 0.25rem;color:var(--text-secondary);font-size:0.85rem;">
+        <span style="flex:1;height:1px;background:#343b4b;"></span>o<span style="flex:1;height:1px;background:#343b4b;"></span>
+      </div>
+      <button type="button" class="btn btn-outline" style="width:100%;margin-top:0.5rem;" onclick="loginWithMicrosoft()">Iniciar sesion con Microsoft</button>
+
+      <div class="auth-footer">
         No tienes cuenta? <a href="register.html">Registrate aqui</a> · <a href="admin.html">Admin</a>
       </div>
     </div>

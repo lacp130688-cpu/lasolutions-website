@@ -9,7 +9,7 @@ function getCurrentUser() {
     var session = result.data.session;
     if (!session) return null;
     var meta = session.user.user_metadata || {};
-    var name = meta.name || (meta.phone ? meta.phone : '');
+    var name = meta.name || meta.full_name || (meta.phone ? meta.phone : '');
     return {
       id: session.user.id,
       name: name,
@@ -93,10 +93,24 @@ function onAuthChange(callback) {
   return supabase.auth.onAuthStateChange(function (_event, session) {
     if (session) {
       var meta = session.user.user_metadata || {};
-      var name = meta.name || (meta.phone ? meta.phone : '');
+      var name = meta.name || meta.full_name || (meta.phone ? meta.phone : '');
       callback({ id: session.user.id, name: name, email: session.user.email });
     } else {
       callback(null);
     }
+  });
+}
+
+// Login with Microsoft (OAuth via Supabase)
+function loginWithMicrosoft() {
+  if (!supabase || !supabase.auth || typeof supabase.auth.signInWithOAuth !== 'function') {
+    alert('El login con Microsoft no esta disponible ahora. Intenta de nuevo.');
+    return;
+  }
+  return supabase.auth.signInWithOAuth({
+    provider: 'microsoft',
+    options: { redirectTo: window.location.href }
+  }).catch(function (err) {
+    alert('No se pudo iniciar con Microsoft: ' + (err && err.message ? err.message : 'error desconocido'));
   });
 }
