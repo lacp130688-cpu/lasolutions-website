@@ -31,8 +31,6 @@ export default function RootLayout({
             __html: `(function(){try{var m=document.querySelectorAll('meta[name="hosting-provider"],meta[name="netlify-deploy"]');for(var i=0;i<m.length;i++){m[i].parentNode.removeChild(m[i]);}var n=document.head.childNodes;for(var i=n.length-1;i>=0;i--){if(n[i].nodeType===8&&n[i].textContent.indexOf('Netlify')!==-1)n[i].parentNode.removeChild(n[i]);}}catch(e){}})();`,
           }}
         />
-          }}
-        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
