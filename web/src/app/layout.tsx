@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import "./style.css";
 import "./effects.css";
@@ -23,7 +24,9 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
-        <script
+        <Script
+          id="netlify-meta-cleanup"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var m=document.querySelectorAll('meta[name="hosting-provider"],meta[name="netlify-deploy"]');for(var i=0;i<m.length;i++){m[i].parentNode.removeChild(m[i]);}}catch(e){}})();`,
           }}
