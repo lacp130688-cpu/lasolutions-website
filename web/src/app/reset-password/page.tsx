@@ -20,13 +20,27 @@ export default function ResetPasswordPage() {
       setStatus('invalid');
       return;
     }
-    // supabase-js (detectSessionInUrl) ya proceso el token al iniciar el cliente.
+    // supabase-js detecta el token en la URL de forma asincrona.
+    // El evento PASSWORD_RECOVERY se dispara cuando ya procesó el hash.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY' || session) {
+        setStatus('ready');
+      }
+    });
+    // Respaldo: si el evento ya ocurrió antes de suscribirnos, chequear la sesión
     supabase.auth
       .getSession()
       .then(({ data: { session } }) => {
-        setStatus(session ? 'ready' : 'invalid');
+        if (session) setStatus('ready');
+        else window.setTimeout(() => {
+          supabase.auth.getSession().then(({ data: { session: s } }) => {
+            if (s) setStatus('ready');
+            else setStatus('invalid');
+          });
+        }, 1500);
       })
       .catch(() => setStatus('invalid'));
+    return () => { subscription.unsubscribe(); };
   }, []);
 
   async function handleSubmit(e: React.FormEvent): Promise<void> {
