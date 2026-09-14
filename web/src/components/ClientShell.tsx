@@ -52,6 +52,13 @@ export default function ClientShell({ children }: { children: React.ReactNode })
     return () => { if (unsub) unsub(); };
   }, []);
 
+  // --- Recovery link forward: `#access_token=...&type=recovery` lands anywhere -> reset page ---
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hash.includes('type=recovery')) {
+      window.location.href = '/reset-password' + window.location.hash;
+    }
+  }, []);
+
   // --- Modal subscription ---
   useEffect(() => {
     return onModalChange(setModalProduct);
