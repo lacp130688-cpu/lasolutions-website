@@ -32,7 +32,7 @@ insert into public.products (id, name, category, brand, price, original_price, d
   (25, 'Acer Nitro V 15', 'Gaming', 'Acer', 849, 849, 'Gaming accesible para jugar en 1080p con generoso rendimiento por su precio.', '["Intel Core i5-13420H","NVIDIA RTX 4050 6GB","16GB DDR5 RAM","512GB SSD NVMe","15.6\" 144Hz"]'::jsonb, 'assets/placeholder.svg', false, true),
   (26, 'Acer Swift Go 14', 'Laptop', 'Acer', 749, 749, 'Ultrabook liviano con USB4 y bateria para todo el dia. Ideal para viajar.', '["Intel Core i5-13500H","16GB RAM","512GB SSD","14\" OLED"]'::jsonb, 'assets/placeholder.svg', false, true),
   (27, 'Apple MacBook Air 13 (M3)', 'Laptop', 'Apple', 1099, 1099, 'Ultraportatil con chip M3: silenciosa, sin ventilador y con bateria que dura todo el dia.', '["Apple M3","8GB memoria unificada","256GB SSD","13.6\" Liquid Retina"]'::jsonb, 'assets/placeholder.svg', true, true),
-  (28, 'Apple MacBook Pro 14 (M3 Pro)', 'Laptop', 'Apple', 1599, 1599, 'Potencia pro con chip M3 Pro para creadores, desarrolladores y editores exigentes.', '["Apple M3 Pro","18GB memoria unificada","512GB SSD","14.2\" Liquid Retina XDR"]'::jsonb, 'assets/placeholder.svg', false, true);
+  (28, 'Apple MacBook Pro 14 (M3 Pro)', 'Laptop', 'Apple', 1599, 1599, 'Potencia pro con chip M3 Pro para creadores, desarrolladores y editores exigentes.', '["Apple M3 Pro","18GB memoria unificada","512GB SSD","14.2\" Liquid Retina XDR"]'::jsonb, 'assets/placeholder.svg', false, true)
 on conflict (id) do update set name = excluded.name, category = excluded.category, brand = excluded.brand, price = excluded.price, original_price = excluded.original_price, description = excluded.description, specs = excluded.specs, image = excluded.image, featured = excluded.featured, active = true;
 
 insert into public.promotions (product_id, discount, sale_price, label, starts_at, ends_at, active) values
@@ -41,7 +41,7 @@ insert into public.promotions (product_id, discount, sale_price, label, starts_a
   (7, 20, 879, 'Oferta laptop', now(), now() + interval '3 days 8 hours', true),
   (9, 25, 449, 'Oferta laptop', now(), now() + interval '5 hours 30 minutes', true),
   (11, 10, 854, 'Oferta Asus TUF', now(), now() + interval '4 days 6 hours', true),
-  (23, 15, 382, 'Oferta Lenovo', now(), now() + interval '1 days 20 hours', true);
+  (23, 15, 382, 'Oferta Lenovo', now(), now() + interval '1 days 20 hours', true)
 on conflict (product_id) do update set discount = excluded.discount, sale_price = excluded.sale_price, label = excluded.label, ends_at = excluded.ends_at, active = true;
 
 select setval(pg_get_serial_sequence('public.products', 'id'), (select max(id) from public.products));
