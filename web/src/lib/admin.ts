@@ -276,8 +276,8 @@ function renderProductsTable(): void {
     let actionsHtml = '';
     if (safeId !== null) {
       actionsHtml =
-        '<button type="button" class="btn btn-sm btn-outline" onclick="window.__adminEditProduct(' + safeId + ')">Editar</button> ' +
-        '<button type="button" class="btn btn-sm btn-danger" onclick="window.__adminDeleteProduct(' + safeId + ')">Borrar</button>';
+        '<button type="button" class="btn btn-sm btn-outline" data-action="edit-product" data-id="' + safeId + '">Editar</button> ' +
+        '<button type="button" class="btn btn-sm btn-danger" data-action="delete-product" data-id="' + safeId + '">Borrar</button>';
     }
     html += '<tr>' +
       '<td>' + _escapeHtml(p.id) + '</td>' +
@@ -527,8 +527,8 @@ function renderPromosTable(): void {
     let actionsHtml = '';
     if (safeId !== null) {
       actionsHtml =
-        '<button type="button" class="btn btn-sm btn-outline" onclick="window.__adminEditPromotion(' + safeId + ')">Editar</button> ' +
-        '<button type="button" class="btn btn-sm btn-danger" onclick="window.__adminDeletePromotion(' + safeId + ')">Borrar</button>';
+        '<button type="button" class="btn btn-sm btn-outline" data-action="edit-promotion" data-id="' + safeId + '">Editar</button> ' +
+        '<button type="button" class="btn btn-sm btn-danger" data-action="delete-promotion" data-id="' + safeId + '">Borrar</button>';
     }
     html += '<tr>' +
       '<td>' + _escapeHtml(pr.product_id) + ' - ' + _escapeHtml(prodName) + '</td>' +

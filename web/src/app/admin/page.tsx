@@ -21,18 +21,27 @@ import {
   cancelPromoForm,
 } from '@/lib/admin';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-declare const window: any;
-
 export default function AdminPage() {
   useEffect(() => {
-    // Wire global handlers used by table buttons rendered via innerHTML
-    window.__adminEditProduct = editProduct;
-    window.__adminDeleteProduct = deleteProduct;
-    window.__adminEditPromotion = editPromotion;
-    window.__adminDeletePromotion = deletePromotion;
+    // Delegacion de eventos para los botones de las tablas (que se renderizan via innerHTML).
+    // Mas robusto que onclick inline: funciona igual aunque el navegador bloquee handlers inline.
+    function onTableAction(e: MouseEvent) {
+      const target = e.target as HTMLElement;
+      const btn = target.closest('[data-action]') as HTMLElement | null;
+      if (!btn) return;
+      const id = Number(btn.getAttribute('data-id'));
+      switch (btn.getAttribute('data-action')) {
+        case 'edit-product': editProduct(id); break;
+        case 'delete-product': deleteProduct(id); break;
+        case 'edit-promotion': editPromotion(id); break;
+        case 'delete-promotion': deletePromotion(id); break;
+      }
+    }
+
+    document.addEventListener('click', onTableAction);
 
     initAdmin();
+    return () => document.removeEventListener('click', onTableAction);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
