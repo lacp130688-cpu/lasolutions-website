@@ -1,6 +1,7 @@
 -- ============================================================
 -- laSolutions - Supabase Schema
--- Ejecutar en: Supabase Dashboard > SQL Editor
+-- Ejecutar el archivo completo en Supabase Dashboard > SQL Editor
+-- (es idempotente).
 -- Incluye: tablas, seed de datos, RLS y funciones auxiliares
 -- ============================================================
 
@@ -163,44 +164,90 @@ insert into public.promotions (product_id, discount, sale_price, label, ends_at)
 on conflict (product_id) do nothing;
 
 -- ------------------------------------------------------------
--- 7. ROW LEVEL SECURITY (RLS)
+-- 7. PANEL ADMIN: administradores + funcion is_admin()
+-- Se define ANTES de las politicas RLS para que las politicas
+-- finales puedan referenciar is_admin() directamente.
 -- ------------------------------------------------------------
+create table if not exists public.admin_users (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
+alter table public.admin_users enable row level security;
+
+-- Nadie toca la tabla directo; solo la funcion is_admin() (security definer)
+drop policy if exists "admin_users no direct access" on public.admin_users;
+create policy "admin_users no direct access"
+  on public.admin_users for select
+  using (false);
+
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+as $$
+  select exists (
+    select 1 from public.admin_users
+    where user_id = auth.uid()
+  );
+$$;
+
+-- ------------------------------------------------------------
+-- 8. ROW LEVEL SECURITY (RLS) — POLITICAS FINALES
+-- Se eliminan politicas intermedias con auth.role()='authenticated'.
+-- Las politicas de escritura requieren is_admin() y las de lectura
+-- de contact_messages tambien. Los selects publicos de products y
+-- promotions se mantienen abiertos.
+-- ------------------------------------------------------------
+
 alter table public.products         enable row level security;
 alter table public.promotions       enable row level security;
 alter table public.contact_messages enable row level security;
 
--- Productos y promociones: lectura publica (anon).
--- NOTA (fase admin): hoy cualquier usuario autenticado puede escribir.
--- Al implementar el panel de administrador, restringir con rol/claim admin.
+-- --- Products ---
+drop policy if exists "products public read" on public.products;
+drop policy if exists "products owner write" on public.products;
+drop policy if exists "products admin write" on public.products;
+
 create policy "products public read"
   on public.products for select
   using (true);
 
-create policy "products owner write"
+create policy "products admin write"
   on public.products for all
-  using (auth.role() = 'authenticated')
-  with check (auth.role() = 'authenticated');
+  using (public.is_admin())
+  with check (public.is_admin());
+
+-- --- Promotions ---
+drop policy if exists "promotions public read" on public.promotions;
+drop policy if exists "promotions owner write" on public.promotions;
+drop policy if exists "promotions admin write" on public.promotions;
 
 create policy "promotions public read"
   on public.promotions for select
   using (true);
 
-create policy "promotions owner write"
+create policy "promotions admin write"
   on public.promotions for all
-  using (auth.role() = 'authenticated')
-  with check (auth.role() = 'authenticated');
+  using (public.is_admin())
+  with check (public.is_admin());
 
--- Contacto: cualquiera puede insertar (anon), solo owner lee
+-- --- Contact messages ---
+drop policy if exists "contact_messages public insert" on public.contact_messages;
+drop policy if exists "contact_messages owner read" on public.contact_messages;
+drop policy if exists "contact_messages admin read" on public.contact_messages;
+
 create policy "contact_messages public insert"
   on public.contact_messages for insert
   with check (true);
 
-create policy "contact_messages owner read"
+create policy "contact_messages admin read"
   on public.contact_messages for select
-  using (auth.role() = 'authenticated');
+  using (public.is_admin());
 
 -- ------------------------------------------------------------
--- 8. FUNCION AUXILIAR: datos de catalogo con promo aplicada
+-- 9. FUNCION AUXILIAR: datos de catalogo con promo aplicada
 -- ------------------------------------------------------------
 create or replace function public.get_products_with_promo()
 returns json
@@ -231,52 +278,3 @@ as $$
    and (pr.ends_at is null or pr.ends_at > now())
   where p.active = true;
 $$;
-
--- ------------------------------------------------------------
--- 9. PANEL ADMIN: administradores + escritura restringida
--- ------------------------------------------------------------
--- Reemplaza la politica "cualquier autenticado escribe" por una
--- lista explicita de admins (admin_users) + funcion is_admin().
--- Para agregar otro admin: insert into public.admin_users (user_id)
--- values ('uuid');  El UUID se ve en Authentication > Users.
-
-create table if not exists public.admin_users (
-  user_id uuid primary key references auth.users(id) on delete cascade,
-  created_at timestamptz not null default now()
-);
-
-alter table public.admin_users enable row level security;
-
--- Nadie toca la tabla directo; solo la funcion is_admin() (security definer)
-create policy "admin_users no direct access"
-  on public.admin_users for select
-  using (false);
-
-create or replace function public.is_admin()
-returns boolean
-language sql
-stable
-security definer
-as $$
-  select exists (
-    select 1 from public.admin_users
-    where user_id = auth.uid()
-  );
-$$;
-
-drop policy if exists "products owner write" on public.products;
-create policy "products admin write"
-  on public.products for all
-  using (public.is_admin())
-  with check (public.is_admin());
-
-drop policy if exists "promotions owner write" on public.promotions;
-create policy "promotions admin write"
-  on public.promotions for all
-  using (public.is_admin())
-  with check (public.is_admin());
-
-drop policy if exists "contact_messages owner read" on public.contact_messages;
-create policy "contact_messages admin read"
-  on public.contact_messages for select
-  using (public.is_admin());

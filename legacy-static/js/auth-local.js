@@ -1,7 +1,8 @@
 /* ============================================
    laSolutions - Local Auth Module
-   Register, email verification (simulated) and
-   login 100% in-browser. No Supabase, no
+   The single site authentication system:
+   register, email verification (simulated) and
+   login, 100% in-browser. No Supabase, no
    external services. Uses localStorage only.
    ============================================ */
 
@@ -64,20 +65,22 @@ function _localShowAlert(id, message, isError) {
   el.classList.add('show');
 }
 
-function _localBoardValue(id) {
+function _localHideAlert(id) {
+  var el = document.getElementById(id);
+  if (el) el.classList.remove('show');
+}
+
+function _localValue(id) {
   var el = document.getElementById(id);
   return el ? el.value.trim() : '';
 }
 
-/* ---------- public API ---------- */
-
-// Toggle a local auth panel (used by login/register buttons)
-function localTogglePanel(panelId) {
-  var panel = document.getElementById(panelId);
-  if (!panel) return;
-  var hidden = panel.style.display === 'none' || !panel.style.display;
-  panel.style.display = hidden ? 'block' : 'none';
+function _localSetDisplay(id, display) {
+  var el = document.getElementById(id);
+  if (el) el.style.display = display;
 }
+
+/* ---------- public API ---------- */
 
 // Register: creates a pending account and returns the
 // simulated verification code (email delivery is mocked).
@@ -137,7 +140,7 @@ function localVerify(code) {
 
   _localRemove(LOCAL_PENDING_KEY);
   _localWrite(LOCAL_SESSION_KEY, { name: pending.name, email: pending.email, isLocal: true });
-  return { success: true, message: 'Cuenta verificada. Sesion local iniciada.' };
+  return { success: true, message: 'Cuenta verificada. Sesion iniciada.' };
 }
 
 // Login with an existing local account. If the account is
@@ -166,7 +169,7 @@ function localLogin(email, password) {
   }
 
   _localWrite(LOCAL_SESSION_KEY, { name: user.name, email: key, isLocal: true });
-  return { success: true, message: 'Sesion local iniciada. Bienvenido, ' + user.name + '!' };
+  return { success: true, message: 'Sesion iniciada. Bienvenido, ' + user.name + '!' };
 }
 
 // Logout from the local session.
@@ -182,66 +185,90 @@ function localGetCurrentUser() {
 /* ---------- UI glue (login.html) ---------- */
 
 function localLoginSubmit() {
-  var email = _localBoardValue('local-email');
-  var password = _localBoardValue('local-password');
+  _localHideAlert('login-error');
+  _localHideAlert('login-success');
+
+  var email = _localValue('email');
+  var password = _localValue('password');
   if (!email || !password) {
-    _localShowAlert('local-login-error', 'Completa el correo y la contrasena.', true);
+    _localShowAlert('login-error', 'Completa el correo y la contrasena.', true);
     return;
   }
+
   var result = localLogin(email, password);
   if (result.success) {
-    _localShowAlert('local-login-error', result.message, false);
+    _localShowAlert('login-success', result.message, false);
     setTimeout(function () { window.location.href = '../index.html'; }, 1000);
     return;
   }
   if (result.pending) {
-    _localShowAlert('local-login-error', result.error, true);
-    var box = document.getElementById('local-verify-box');
-    if (box) box.style.display = 'block';
-    var codeEl = document.getElementById('local-verify-code');
+    _localShowAlert('login-error', result.error, true);
+    _localSetDisplay('verify-box', 'block');
+    var codeEl = document.getElementById('verify-code');
     if (codeEl) {
       codeEl.textContent = 'Simulacion de email: tu codigo de verificacion es ' + result.code;
       codeEl.classList.add('show');
     }
     return;
   }
-  _localShowAlert('local-login-error', result.error, true);
+  _localShowAlert('login-error', result.error, true);
 }
 
 function localVerifySubmit() {
-  var code = _localBoardValue('local-code');
+  _localHideAlert('login-error');
+  _localHideAlert('login-success');
+
+  var code = _localValue('verify-code-input');
   if (!code) {
-    _localShowAlert('local-login-error', 'Ingresa el codigo de 6 digitos.', true);
+    _localShowAlert('login-error', 'Ingresa el codigo de 6 digitos.', true);
     return;
   }
   var result = localVerify(code);
   if (result.success) {
-    _localShowAlert('local-login-error', result.message, false);
+    _localShowAlert('login-success', result.message, false);
     setTimeout(function () { window.location.href = '../index.html'; }, 1000);
     return;
   }
-  _localShowAlert('local-login-error', result.error, true);
+  _localShowAlert('login-error', result.error, true);
 }
 
 /* ---------- UI glue (register.html) ---------- */
 
 function localRegisterSubmit() {
-  var name = _localBoardValue('local-reg-name');
-  var email = _localBoardValue('local-reg-email');
-  var password = _localBoardValue('local-reg-password');
+  _localHideAlert('reg-error');
+  _localHideAlert('reg-success');
 
-  var result = localRegister(name, email, password);
-  if (!result.success) {
-    _localShowAlert('local-reg-error', result.error, true);
+  var name = _localValue('name');
+  var email = _localValue('email');
+  var password = _localValue('password');
+  var confirm = _localValue('confirm-password');
+
+  if (name.length < 2) {
+    _localShowAlert('reg-error', 'El nombre debe tener al menos 2 caracteres.', true);
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    _localShowAlert('reg-error', 'Ingresa un correo electronico valido.', true);
+    return;
+  }
+  if (password.length < 6) {
+    _localShowAlert('reg-error', 'La contrasena debe tener al menos 6 caracteres.', true);
+    return;
+  }
+  if (password !== confirm) {
+    _localShowAlert('reg-error', 'Las contrasenas no coinciden.', true);
     return;
   }
 
-  var step1 = document.getElementById('local-reg-step1');
-  var step2 = document.getElementById('local-reg-step2');
-  if (step1) step1.style.display = 'none';
-  if (step2) step2.style.display = 'block';
+  var result = localRegister(name, email, password);
+  if (!result.success) {
+    _localShowAlert('reg-error', result.error, true);
+    return;
+  }
 
-  var codeEl = document.getElementById('local-reg-code');
+  _localSetDisplay('reg-step-1', 'none');
+  _localSetDisplay('reg-step-2', 'block');
+  var codeEl = document.getElementById('reg-code');
   if (codeEl) {
     codeEl.textContent = 'Simulacion de email: tu codigo de verificacion es ' + result.code +
       '. En produccion llegaria por correo. Expiracion: 10 minutos.';
@@ -250,18 +277,20 @@ function localRegisterSubmit() {
 }
 
 function localVerifyFromRegister() {
-  var code = _localBoardValue('local-reg-verify-code');
+  _localHideAlert('reg-error');
+  _localHideAlert('reg-success');
+
+  var code = _localValue('reg-verify-code');
   if (!code) {
-    _localShowAlert('local-reg-error', 'Ingresa el codigo de 6 digitos.', true);
+    _localShowAlert('reg-error', 'Ingresa el codigo de 6 digitos.', true);
     return;
   }
   var result = localVerify(code);
   if (result.success) {
-    var step2 = document.getElementById('local-reg-step2');
-    if (step2) step2.style.display = 'none';
-    _localShowAlert('local-reg-error', result.message, false);
+    _localSetDisplay('reg-step-2', 'none');
+    _localShowAlert('reg-success', result.message, false);
     setTimeout(function () { window.location.href = '../index.html'; }, 1500);
     return;
   }
-  _localShowAlert('local-reg-error', result.error, true);
+  _localShowAlert('reg-error', result.error, true);
 }

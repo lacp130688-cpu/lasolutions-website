@@ -1,0 +1,364 @@
+/* ============================================
+   laSolutions - Gaming Theme (Razer / ROG style)
+   Dark premium, angular cuts, strong glow.
+   Loaded AFTER style.css and effects.css.
+   ============================================ */
+
+/* ---------- Intensified palette ---------- */
+:root {
+  --shadow-glow-purple: 0 0 24px rgba(108, 99, 255, 0.55), 0 0 48px rgba(108, 99, 255, 0.18);
+  --shadow-glow-cyan: 0 0 24px rgba(0, 212, 255, 0.45), 0 0 48px rgba(0, 212, 255, 0.15);
+  --gaming-stripes: repeating-linear-gradient(135deg, rgba(108, 99, 255, 0.05) 0px, rgba(108, 99, 255, 0.05) 2px, transparent 2px, transparent 12px);
+}
+
+body {
+  background:
+    radial-gradient(1000px 500px at 50% -10%, rgba(108, 99, 255, 0.08), transparent 60%),
+    var(--bg);
+}
+
+::selection {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* Custom scrollbar (gaming touch) */
+html { scrollbar-color: var(--primary) var(--bg); }
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--primary), var(--accent));
+  border-radius: 5px;
+}
+
+/* ---------- Navbar ---------- */
+.navbar {
+  border-bottom: 1px solid transparent;
+  border-image: linear-gradient(90deg, transparent, rgba(108, 99, 255, 0.6), rgba(0, 212, 255, 0.6), transparent) 1;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+}
+
+.navbar.scrolled {
+  box-shadow: 0 2px 30px rgba(0, 0, 0, 0.6), 0 0 30px rgba(108, 99, 255, 0.12);
+}
+
+.nav-logo span {
+  text-shadow: 0 0 12px rgba(0, 212, 255, 0.8);
+}
+
+.nav-link:hover,
+.nav-link.active {
+  background: linear-gradient(135deg, rgba(108, 99, 255, 0.25), rgba(0, 212, 255, 0.12));
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+/* ---------- Hero: cyber grid overlay ---------- */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(108, 99, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(108, 99, 255, 0.06) 1px, transparent 1px);
+  background-size: 46px 46px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 35%, #000 30%, transparent 75%);
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 35%, #000 30%, transparent 75%);
+}
+
+/* ---------- Section titles: sharper, glowing ---------- */
+.section-title {
+  letter-spacing: 2px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.section-title::after {
+  width: 140px;
+  height: 4px;
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.7);
+  background: linear-gradient(90deg, var(--primary), var(--accent), transparent);
+}
+
+/* ---------- Buttons: angular, glow ---------- */
+.btn {
+  position: relative;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -80%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.5s ease;
+  pointer-events: none;
+}
+
+.btn:hover::before { left: 120%; }
+
+.btn-primary:hover,
+.btn-accent:hover {
+  filter: brightness(1.12);
+}
+
+/* ---------- Product cards: ROG edge + glow ---------- */
+.product-card,
+.promo-card {
+  border: 1px solid rgba(108, 99, 255, 0.25);
+  background: linear-gradient(160deg, var(--surface), rgba(45, 43, 85, 0.55));
+}
+
+.product-card::before,
+.promo-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  border-top: 26px solid var(--primary);
+  border-right: 26px solid transparent;
+  opacity: 0.85;
+  z-index: 3;
+  pointer-events: none;
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+.product-card:hover::before,
+.promo-card:hover::before {
+  filter: drop-shadow(0 0 8px var(--primary));
+}
+
+.product-card:hover,
+.promo-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-glow-purple), 0 0 0 1px rgba(0, 212, 255, 0.3);
+}
+
+.product-card-image,
+.promo-card-image {
+  background:
+    radial-gradient(300px 150px at 50% 100%, rgba(108, 99, 255, 0.12), transparent 70%),
+    var(--bg);
+}
+
+/* Badges: angular chips */
+.product-badge,
+.promo-discount {
+  border-radius: 4px;
+  letter-spacing: 1px;
+}
+
+.product-price {
+  text-shadow: 0 0 14px rgba(0, 212, 255, 0.6);
+}
+
+/* ---------- Promotions ---------- */
+.promo-banner,
+.deal-of-day {
+  background-image: var(--gaming-stripes), linear-gradient(135deg, var(--secondary), rgba(108, 99, 255, 0.35));
+  border-color: rgba(0, 212, 255, 0.4);
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.35), 0 0 30px rgba(108, 99, 255, 0.15);
+}
+
+.countdown-unit {
+  border-radius: 4px;
+  border-color: rgba(0, 212, 255, 0.35);
+  background: linear-gradient(180deg, var(--bg), rgba(45, 43, 85, 0.4));
+}
+
+.countdown-value {
+  color: var(--accent);
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.7);
+}
+
+/* ---------- Catalog sidebar ---------- */
+.catalog-sidebar {
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+  border-color: rgba(108, 99, 255, 0.2);
+}
+
+.filter-group h4::before {
+  content: '// ';
+  color: var(--accent);
+  font-family: var(--font-heading);
+}
+
+.filter-group label:hover input[type="checkbox"] { box-shadow: 0 0 8px var(--primary); }
+
+/* ---------- Search & selects ---------- */
+.search-box:focus-within,
+.sort-select:focus {
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.15), 0 0 20px rgba(108, 99, 255, 0.2);
+}
+
+/* ---------- About / team / feature cards ---------- */
+.feature-card,
+.team-card,
+.contact-info-card,
+.contact-form-card {
+  border-color: rgba(108, 99, 255, 0.2);
+}
+
+.feature-card:hover,
+.team-card:hover {
+  box-shadow: var(--shadow-glow-purple);
+}
+
+.feature-icon {
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.25);
+}
+
+/* ---------- Auth ---------- */
+.auth-card {
+  border-color: rgba(0, 212, 255, 0.3);
+  border-top: 3px solid var(--accent);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 0 40px rgba(108, 99, 255, 0.1);
+}
+
+/* ---------- Modal (ROG frame) ---------- */
+.modal {
+  border: 1px solid rgba(0, 212, 255, 0.35);
+  border-top: 3px solid var(--accent);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(108, 99, 255, 0.2);
+}
+
+/* ---------- Footer ---------- */
+.footer {
+  border-top: 1px solid transparent;
+  border-image: linear-gradient(90deg, transparent, rgba(108, 99, 255, 0.6), rgba(0, 212, 255, 0.6), transparent) 1;
+}
+
+.footer-social a:hover {
+  box-shadow: var(--shadow-glow-purple);
+}
+
+/* ---------- Featured carousel (home) ---------- */
+.carousel-wrap { position: relative; }
+
+.featured-carousel {
+  display: flex;
+  gap: 2rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding: 0.5rem 0 1.5rem;
+  scroll-behavior: smooth;
+}
+
+.featured-carousel::-webkit-scrollbar { display: none; }
+
+.featured-carousel .product-card {
+  flex: 0 0 calc((100% - 4rem) / 3);
+  scroll-snap-align: start;
+}
+
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 6;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 212, 255, 0.45);
+  background: rgba(15, 14, 23, 0.9);
+  color: var(--accent);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+.carousel-btn:hover {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: var(--shadow-glow-purple);
+}
+
+.carousel-prev { left: -58px; }
+.carousel-next { right: -58px; }
+
+/* ---------- Brands marquee (home, auto-scrolling) ---------- */
+.brands-marquee {
+  overflow: hidden;
+  padding: 0.5rem 0 1rem;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+.brands-track {
+  display: flex;
+  width: max-content;
+  animation: brandsScroll 26s linear infinite;
+  will-change: transform;
+}
+
+.brands-track:hover { animation-play-state: paused; }
+
+.brands-track .brand-chip {
+  flex: 0 0 auto;
+  margin-right: 1rem;
+}
+
+@keyframes brandsScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.brand-chip {
+  background: linear-gradient(160deg, var(--surface), rgba(45, 43, 85, 0.5));
+  border: 1px solid rgba(108, 99, 255, 0.25);
+  border-radius: 12px;
+  padding: 1.6rem 1rem;
+  text-align: center;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+  cursor: default;
+  user-select: none;
+}
+
+.brand-chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-glow-purple);
+  text-shadow: 0 0 12px rgba(0, 212, 255, 0.6);
+}
+
+@media (max-width: 1024px) {
+  .featured-carousel .product-card { flex: 0 0 calc((100% - 2rem) / 2); }
+  .carousel-prev { left: -10px; }
+  .carousel-next { right: -10px; }
+}
+
+@media (max-width: 768px) {
+  .featured-carousel .product-card { flex: 0 0 100%; }
+}
+
+/* ---------- Reduced motion: kill decorative fx ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .btn::before { display: none; }
+  .hero::after { display: none; }
+  .brands-track { animation: none !important; }
+  .brands-marquee { overflow-x: auto; }
+  .navbar, .product-card, .promo-card, .feature-card, .team-card { transition: none !important; }
+}

@@ -1,13 +1,21 @@
 # ============================================================
-# laSolutions - Netlify configuration
-# Publica el contenido de /public como sitio estatico
+# laSolutions - Netlify configuration (Next.js app)
+# La app vive en /web (Next.js 16, App Router)
 # ============================================================
 
 [build]
-  publish = "public"
-  command = ""
+  base = "web"
+  command = "npm run build"
+  publish = ".next"
 
-# Headers de seguridad + Supabase CSP
+# Netlify Next.js runtime (construye y sirve la app Next)
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[build.environment]
+  NODE_VERSION = "24"
+
+# Headers de seguridad (refuerzo; la app tambien los envia desde next.config.ts)
 [[headers]]
   for = "/*"
   [headers.values]
@@ -15,25 +23,17 @@
     X-Frame-Options = "DENY"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://qyyyeiyjqwsfaqwazfgb.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 
-# Cache: assets inmutables
+# Cache: assets de Next inmutables (chunks con hash)
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Cache: imagenes publicas
 [[headers]]
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
-
-# Cache: JS/CSS
-[[headers]]
-  for = "/*.js"
-  [headers.values]
-    Cache-Control = "public, max-age=86400"
-[[headers]]
-  for = "/*.css"
-  [headers.values]
-    Cache-Control = "public, max-age=86400"
-
-# SPA fallback (todas las rutas -> index.html)
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
