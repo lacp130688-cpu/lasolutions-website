@@ -15,7 +15,8 @@
 [build.environment]
   NODE_VERSION = "24"
 
-# Headers de seguridad (refuerzo; la app tambien los envia desde next.config.ts)
+# Headers de seguridad (refuerzo; la CSP la emite el middleware de Next con nonces,
+# un segundo header CSP en esta capa romperia la interseccion de policies)
 [[headers]]
   for = "/*"
   [headers.values]
@@ -23,8 +24,6 @@
     X-Frame-Options = "DENY"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
-    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
-    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://qyyyeiyjqwsfaqwazfgb.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 
 # Cache: assets de Next inmutables (chunks con hash)
 [[headers]]
