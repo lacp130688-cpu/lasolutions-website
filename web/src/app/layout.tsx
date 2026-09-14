@@ -23,6 +23,11 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var m=document.querySelectorAll('meta[name="hosting-provider"],meta[name="netlify-deploy"]');for(var i=0;i<m.length;i++){m[i].parentNode.removeChild(m[i]);}}catch(e){}})();`,
+          }}
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -31,11 +36,6 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var m=document.querySelectorAll('meta[name="hosting-provider"],meta[name="netlify-deploy"]');for(var i=0;i<m.length;i++){m[i].parentNode.removeChild(m[i]);}}catch(e){}})();`,
-          }}
-        />
         <ClientShell>{children}</ClientShell>
       </body>
     </html>
