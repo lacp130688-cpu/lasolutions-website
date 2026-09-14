@@ -126,12 +126,19 @@ function isSupabaseConfigured(): boolean {
 export async function loadSiteData(): Promise<Product[]> {
   if (PRODUCTS_LOADED) return PRODUCTS;
 
+  const TIMEOUT_MS = 5000;
+
   try {
-    // Try Supabase first
+    // Try Supabase first (with timeout — DNS failures can hang the Promise)
+    const productsPromise = supabase.from('products').select('*').eq('active', true).order('id');
+    const promosPromise = supabase.from('promotions').select('*').eq('active', true);
+
     const [productsResult, promosResult] = await Promise.all([
-      supabase.from('products').select('*').eq('active', true).order('id'),
-      supabase.from('promotions').select('*').eq('active', true),
+      Promise.race([productsPromise, new Promise<never>((_, rej) => setTimeout(() => rej(new Error('timeout')), TIMEOUT_MS))]),
+      Promise.race([promosPromise, new Promise<never>((_, rej) => setTimeout(() => rej(new Error('timeout')), TIMEOUT_MS))]),
     ]);
+
+    if (productsResult.error) throw productsResult.error;
 
     const productsRows = productsResult.data || [];
     const promoRows = promosResult.data || [];
