@@ -1,6 +1,4 @@
-﻿Productos: 28 | Promociones: 6
-OK - seed generado
--- ============================================================
+﻿-- ============================================================
 -- laSolutions - SEED de datos (generado desde fallback.ts)
 -- Corre en el SQL Editor del proyecto NUEVO, DESPUES de schema.sql
 -- Idempotente: se puede re-ejecutar sin duplicar.
