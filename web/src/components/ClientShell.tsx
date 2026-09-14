@@ -517,9 +517,6 @@ export default function ClientShell({ children }: { children: React.ReactNode })
           {toastMsg}
         </div>
       )}
-
-      {/* Toast animation keyframes */}
-      <style dangerouslySetInnerHTML={{ __html: '@keyframes toastIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}' }} />
     </>
   );
 }

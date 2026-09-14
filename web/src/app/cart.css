@@ -472,6 +472,12 @@
   to { transform: rotate(360deg); }
 }
 
+/* ---------- Toast (notificacion del carrito) ---------- */
+@keyframes toastIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
 /* ---------- Body lock (no scroll when drawer open) ---------- */
 body.cart-open {
   overflow: hidden;
