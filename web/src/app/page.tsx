@@ -6,7 +6,7 @@ import Footer from '@/components/Footer';
 import Effects from '@/components/Effects';
 import ProductCard from '@/components/ProductCard';
 import {
-  loadSiteData, loadFallbackData, getFeaturedProducts, getThirdPartyBrands,
+  loadSiteData, getFeaturedProducts, getThirdPartyBrands,
   getDealOfTheDay, scrollCarousel, PRODUCTS, PROMOTIONS,
 } from '@/lib/catalog-data';
 
@@ -22,7 +22,7 @@ export default function HomePage() {
         await loadSiteData();
       } catch (err) {
         console.error('Error inicializando datos, usando respaldo:', err);
-        loadFallbackData();
+        
       }
       setLoaded(true);
     }

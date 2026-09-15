@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Footer from '@/components/Footer';
 import Effects from '@/components/Effects';
 import {
-  loadSiteData, loadFallbackData, getDealOfTheDay, PRODUCTS, PROMOTIONS,
+  loadSiteData, getDealOfTheDay, PRODUCTS, PROMOTIONS,
   formatPrice, formatCountdown, resolveImageUrl,
 } from '@/lib/catalog-data';
 import { addToCart } from '@/lib/ui';
@@ -58,8 +58,7 @@ export default function PromotionsPage() {
         await loadSiteData();
       } catch (err) {
         console.error('Error inicializando datos, usando respaldo:', err);
-        loadFallbackData();
-      }
+        }
       setLoaded(true);
     }
     init();

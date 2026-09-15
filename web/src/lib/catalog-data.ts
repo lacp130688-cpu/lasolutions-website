@@ -5,7 +5,7 @@
    ============================================ */
 
 import { supabase } from './supabase-config';
-import { FALLBACK_PRODUCTS, FALLBACK_PROMOTIONS } from './fallback';
+//import { FALLBACK_PRODUCTS, FALLBACK_PROMOTIONS } from './fallback';
 
 /* ---------- Types ---------- */
 export interface Product {
@@ -108,11 +108,7 @@ export function resolveImageUrl(img: string | null | undefined): string {
 }
 
 /* ---------- Data Loading ---------- */
-export function loadFallbackData(): void {
-  PRODUCTS = FALLBACK_PRODUCTS.map(p => ({ ...p }));
-  PROMOTIONS = FALLBACK_PROMOTIONS.map(p => ({ ...p, endDate: p.endDate }));
-  PRODUCTS_LOADED = true;
-}
+
 
 function isSupabaseConfigured(): boolean {
   return !!(
@@ -143,10 +139,7 @@ export async function loadSiteData(): Promise<Product[]> {
     const productsRows = productsResult.data || [];
     const promoRows = promosResult.data || [];
 
-    if (!productsRows.length) {
-      loadFallbackData();
-      return PRODUCTS;
-    }
+   
 
     // Build PROMOTIONS array
     PROMOTIONS = (promoRows || []).map((promo: Record<string, unknown>) => ({
@@ -197,7 +190,6 @@ export async function loadSiteData(): Promise<Product[]> {
     return PRODUCTS;
   } catch (err) {
     console.error('Error cargando datos de Supabase, usando datos locales:', err);
-    loadFallbackData();
     return PRODUCTS;
   }
 }

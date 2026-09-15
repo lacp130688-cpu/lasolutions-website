@@ -47,7 +47,7 @@ function loadSiteData() {
   try {
     // Sin credenciales reales o SDK sin cargar: usar los productos ficticios de ejemplo
     if (!isSupabaseConfigured() || !window.supabase) {
-      loadFallbackData();
+       
       return Promise.resolve(PRODUCTS);
     }
 
@@ -61,7 +61,7 @@ function loadSiteData() {
 
       // Sin datos en la base: caer a los ejemplos locales
       if (!productsRows.length) {
-        loadFallbackData();
+         
         return PRODUCTS;
       }
 
@@ -118,13 +118,13 @@ function loadSiteData() {
     })
     .catch(function (err) {
       console.error('Error cargando datos de Supabase, usando datos locales:', err);
-      loadFallbackData();
+       
       return PRODUCTS;
     });
   } catch (err) {
     // Defensa final: ningun error sincronico puede dejar la pagina vacia
     console.error('Error inesperado en loadSiteData, usando respaldo:', err);
-    loadFallbackData();
+     
     return Promise.resolve(PRODUCTS);
   }
 }

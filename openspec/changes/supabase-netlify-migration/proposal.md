@@ -28,7 +28,7 @@ The website currently ships with:
    state in the navbar.
 3. Persist contact messages in the database.
 4. Make the site deployable on Netlify with security headers, caching, and an
-   SPA fallback.
+   SPA.
 5. Keep the project dependency-free: vanilla JS + Supabase JS client from a
    CDN. No build step.
 

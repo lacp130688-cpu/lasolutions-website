@@ -5,7 +5,7 @@ import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
 import Effects from '@/components/Effects';
 import {
-  loadSiteData, loadFallbackData, getFilteredProducts, getAllBrands,
+  loadSiteData, getFilteredProducts, getAllBrands,
   catalogState, PRICE_RANGES, PRODUCTS,
 } from '@/lib/catalog-data';
 
@@ -22,7 +22,7 @@ export default function CatalogPage() {
         await loadSiteData();
       } catch (err) {
         console.error('Error inicializando datos, usando respaldo:', err);
-        loadFallbackData();
+        
       }
       setLoaded(true);
     }

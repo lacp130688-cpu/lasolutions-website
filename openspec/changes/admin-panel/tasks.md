@@ -14,8 +14,6 @@
 
 ## Frontend data layer
 
-- [x] T3 — Create `public/js/data-fallback.js`: 28 products + 6 promotions
-      mirroring the seed, used whenever Supabase or the CDN is unavailable.
 - [x] T4 — Harden `public/js/supabase-config.js`: create the client **always**
       (the CDN UMD global is the module container, not a client), fall back to
       `window.supabase = null` on CDN failure.
