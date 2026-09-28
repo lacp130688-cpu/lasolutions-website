@@ -1,0 +1,45 @@
+# ============================================================
+# laSolutions - Deploy a Cloudflare Workers (OpenNext adapter)
+# Se dispara en cada push a master. Requiere secrets:
+#   CLOUDFLARE_API_TOKEN  (token de Cloudflare con permiso Workers)
+#   CLOUDFLARE_ACCOUNT_ID (ID de tu cuenta Cloudflare)
+# ============================================================
+
+name: Deploy a Cloudflare Workers
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-cf
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Build adaptado (OpenNext)
+        run: npx opennextjs-cloudflare build
+
+      - name: Deploy a Workers
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

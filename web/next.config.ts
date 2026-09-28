@@ -3,6 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   poweredByHeader: false,
 
+  // Salida standalone: requerida por el adapter OpenNext Cloudflare
+  // para transformar el build al runtime de Workers.
+  output: "standalone",
+
   // Permite acceder al dev server desde la IP local de red (192.168.56.1)
   // sin que Next bloquee recursos de desarrollo por cross-origin.
   allowedDevOrigins: ["192.168.56.1"],
