@@ -4,7 +4,6 @@
    Data loaded from Supabase with local fallback.
    ============================================ */
 
-import { supabase } from './supabase-config';
 //import { FALLBACK_PRODUCTS, FALLBACK_PROMOTIONS } from './fallback';
 
 /* ---------- Types ---------- */
@@ -125,21 +124,14 @@ export async function loadSiteData(): Promise<Product[]> {
   const TIMEOUT_MS = 5000;
 
   try {
-    // Try Supabase first (with timeout — DNS failures can hang the Promise)
-    const productsPromise = supabase.from('products').select('*').eq('active', true).order('id');
-    const promosPromise = supabase.from('promotions').select('*').eq('active', true);
+    // Try the API first (with timeout — the request can hang)
+    const productsPromise = fetch('/api/products').then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(j => j.data || []);
+    const promosPromise = fetch('/api/promotions').then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(j => j.data || []);
 
-    const [productsResult, promosResult] = await Promise.all([
+    const [productsRows, promoRows] = await Promise.all([
       Promise.race([productsPromise, new Promise<never>((_, rej) => setTimeout(() => rej(new Error('timeout')), TIMEOUT_MS))]),
       Promise.race([promosPromise, new Promise<never>((_, rej) => setTimeout(() => rej(new Error('timeout')), TIMEOUT_MS))]),
     ]);
-
-    if (productsResult.error) throw productsResult.error;
-
-    const productsRows = productsResult.data || [];
-    const promoRows = promosResult.data || [];
-
-   
 
     // Build PROMOTIONS array
     PROMOTIONS = (promoRows || []).map((promo: Record<string, unknown>) => ({
@@ -189,7 +181,7 @@ export async function loadSiteData(): Promise<Product[]> {
     PRODUCTS_LOADED = true;
     return PRODUCTS;
   } catch (err) {
-    console.error('Error cargando datos de Supabase, usando datos locales:', err);
+    console.error('Error cargando datos de la API, usando datos locales:', err);
     return PRODUCTS;
   }
 }

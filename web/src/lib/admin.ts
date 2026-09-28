@@ -4,10 +4,23 @@
    (called from useEffect in admin page component).
    ============================================ */
 
-import { supabase, SUPABASE_URL } from './supabase-config';
+import { supabase } from './supabase-config';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare const window: any;
+
+/**
+ * Calls an internal admin API endpoint forwarding the current Supabase session
+ * token so the server can resolve auth.uid() and let RLS (is_admin) authorize.
+ */
+async function adminFetch(path: string, init?: RequestInit): Promise<any> {
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token;
+  const headers: Record<string, string> = { 'Content-Type': 'application/json', ...(init?.headers as Record<string, string> | undefined) };
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  const res = await fetch(path, { ...init, headers });
+  return res.json().catch(() => ({ success: false }));
+}
 
 // Module-level caches (like the original globals)
 let PRODUCTS_CACHE: any[] = [];
@@ -186,16 +199,8 @@ export async function initAdmin(): Promise<void> {
       return;
     }
 
-    const { data, error: rpcError } = await supabase.rpc('is_admin');
-    if (rpcError) {
-      showDenied('Error verificando permisos: ' + rpcError.message);
-      return;
-    }
-    if (data === true) {
-      showPanel();
-    } else {
-      showDenied('Acceso denegado: no sos administrador');
-    }
+    let payload: any; try { payload = await adminFetch('/api/admin/me'); } catch (err: any) { showDenied('Error verificando permisos: ' + (err?.message || err)); return; }
+    if (payload.isAdmin === true) { showPanel(); } else { showDenied(payload?.error || 'Acceso denegado: no sos administrador'); }
   } catch (err: any) {
     showLogin();
     setLoginError('Error obteniendo sesion: ' + (err?.message || err));
@@ -247,13 +252,13 @@ async function loadProducts(): Promise<void> {
   if (tbody) tbody.innerHTML = '<tr><td colspan="8" class="table-empty">Cargando productos...</td></tr>';
 
   try {
-    const { data, error } = await supabase.from('products').select('*').order('id', { ascending: true });
+    const data = await adminFetch('/api/admin/products'); const { error } = data || {}; const rows = data?.data || [];
     recordLoadTime('products', t0);
     if (error) {
-      if (tbody) tbody.innerHTML = '<tr><td colspan="8" class="table-empty">Error cargando productos: ' + _escapeHtml(error.message) + '</td></tr>';
+      if (tbody) tbody.innerHTML = '<tr><td colspan="8" class="table-empty">Error cargando productos: ' + _escapeHtml(error) + '</td></tr>';
       return;
     }
-    PRODUCTS_CACHE = data || [];
+    PRODUCTS_CACHE = rows;
     renderProductsTable();
   } catch (err: any) {
     recordLoadTime('products', t0);
@@ -404,14 +409,10 @@ export async function saveProduct(): Promise<void> {
 
 async function persistProduct(obj: any): Promise<void> {
   try {
-    let action;
-    if (currentProductId === null) {
-      action = supabase.from('products').insert(obj);
-    } else {
-      action = supabase.from('products').update(obj).eq('id', currentProductId);
-    }
-    const { error } = await action;
-    if (error) { showAdminError('No se pudo guardar el producto: ' + error.message); return; }
+    const path2 = currentProductId === null ? '/api/admin/products' : '/api/admin/products/' + currentProductId;
+    const method = currentProductId === null ? 'POST' : 'PUT';
+    const json = await adminFetch(path2, { method, body: JSON.stringify(obj) });
+    if (json?.error) { showAdminError('No se pudo guardar el producto: ' + json.error); return; }
     clearAdminError();
     hideProductForm();
     loadProducts();
@@ -431,15 +432,18 @@ function uploadProductImage(file: File, callback: (err: string | null, url: stri
     callback('El archivo supera los 2MB.', null); return;
   }
 
-  const cleanName = file.name.replace(/[^a-zA-Z0-9.\-]/g, '-').toLowerCase();
-  const path = 'productos/' + Date.now() + '-' + cleanName;
-
-  supabase.storage.from('product-images').upload(path, file).then(({ error }) => {
-    if (error) { callback(error.message, null); return; }
-    const url = SUPABASE_URL + '/storage/v1/object/public/product-images/' + path;
-    callback(null, url);
-  }).catch((err: any) => {
-    callback(err?.message || String(err), null);
+  const fd = new FormData();
+  fd.append('file', file);
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    const headers: Record<string, string> = {};
+    if (session?.access_token) headers['Authorization'] = 'Bearer ' + session.access_token;
+    fetch('/api/admin/upload', { method: 'POST', headers, body: fd })
+      .then(r => r.json())
+      .then((json: any) => {
+        if (json?.error) { callback(json.error, null); return; }
+        callback(null, json.url);
+      })
+      .catch((err: any) => callback(err?.message || String(err), null));
   });
 }
 
@@ -449,8 +453,8 @@ export async function deleteProduct(id: number): Promise<void> {
   if (!confirm('Borrar el producto "' + name + '"? Se eliminaran tambien sus promociones.')) return;
 
   try {
-    const { error } = await supabase.from('products').delete().eq('id', id);
-    if (error) { showAdminError('No se pudo borrar el producto: ' + error.message); return; }
+    const json = await adminFetch('/api/admin/products/' + id, { method: 'DELETE' }); const error = json?.error;
+    if (error) { showAdminError('No se pudo borrar el producto: ' + error); return; }
     clearAdminError();
     loadProducts();
     loadPromotions();
@@ -495,13 +499,13 @@ async function loadPromotions(): Promise<void> {
   if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="table-empty">Cargando promociones...</td></tr>';
 
   try {
-    const { data, error } = await supabase.from('promotions').select('*').order('product_id', { ascending: true });
+    const data = await adminFetch('/api/admin/promotions'); const { error } = data || {}; const rows = data?.data || [];
     recordLoadTime('promos', t0);
     if (error) {
-      if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="table-empty">Error cargando promociones: ' + _escapeHtml(error.message) + '</td></tr>';
+      if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="table-empty">Error cargando promociones: ' + _escapeHtml(error) + '</td></tr>';
       return;
     }
-    PROMOS_CACHE = data || [];
+    PROMOS_CACHE = rows;
     renderPromosTable();
     populatePromoProductSelect();
   } catch (err: any) {
@@ -626,14 +630,10 @@ export async function savePromotion(): Promise<void> {
   };
 
   try {
-    let action;
-    if (currentPromoId === null) {
-      action = supabase.from('promotions').insert(obj);
-    } else {
-      action = supabase.from('promotions').update(obj).eq('id', currentPromoId);
-    }
-    const { error } = await action;
-    if (error) { showAdminError('No se pudo guardar la promocion: ' + error.message); return; }
+    const path2 = currentPromoId === null ? '/api/admin/promotions' : '/api/admin/promotions/' + currentPromoId;
+    const method = currentPromoId === null ? 'POST' : 'PUT';
+    const json = await adminFetch(path2, { method, body: JSON.stringify(obj) });
+    if (json?.error) { showAdminError('No se pudo guardar la promocion: ' + json.error); return; }
     clearAdminError();
     hidePromoForm();
     loadPromotions();
@@ -646,8 +646,8 @@ export async function deletePromotion(id: number): Promise<void> {
   if (!confirm('Borrar esta promocion?')) return;
 
   try {
-    const { error } = await supabase.from('promotions').delete().eq('id', id);
-    if (error) { showAdminError('No se pudo borrar la promocion: ' + error.message); return; }
+    const json = await adminFetch('/api/admin/promotions/' + id, { method: 'DELETE' }); const error = json?.error;
+    if (error) { showAdminError('No se pudo borrar la promocion: ' + error); return; }
     clearAdminError();
     loadPromotions();
   } catch (err: any) {
@@ -669,14 +669,13 @@ async function loadMessages(): Promise<void> {
   if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="table-empty">Cargando mensajes...</td></tr>';
 
   try {
-    const { data, error } = await supabase.from('contact_messages').select('*').order('created_at', { ascending: false });
+    const data = await adminFetch('/api/admin/messages'); const { error } = data || {}; const rows = data?.data || [];
     recordLoadTime('messages', t0);
     if (error) {
-      if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="table-empty">Error cargando mensajes: ' + _escapeHtml(error.message) + '</td></tr>';
+      if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="table-empty">Error cargando mensajes: ' + _escapeHtml(error) + '</td></tr>';
       return;
     }
 
-    const rows = data || [];
     if (rows.length === 0) {
       if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="table-empty">No hay mensajes de contacto.</td></tr>';
       return;
