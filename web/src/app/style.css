@@ -170,7 +170,7 @@ p{color:var(--text-secondary)}
 
 /* ---------- Catalog Page ---------- */
 .catalog-layout{display:grid;grid-template-columns:260px 1fr;gap:2rem;padding-top:calc(var(--nav-height) + 2rem)}
-.catalog-sidebar{position:sticky;top:calc(var(--nav-height) + 2rem);align-self:start;background:var(--surface);border-radius:var(--radius-card);padding:1.5rem;border:1px solid rgba(108,99,255,0.1);height:fit-content}
+.catalog-sidebar{position:sticky;top:calc(var(--nav-height) + 2rem);align-self:start;background:var(--surface);border-radius:var(--radius-card);padding:1.5rem;border:1px solid rgba(108,99,255,0.1);height:fit-content;max-height:calc(100vh - var(--nav-height) - 4rem);overflow-y:auto}
 .catalog-sidebar h3{font-family:var(--font-body);font-size:1rem;font-weight:600;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid rgba(108,99,255,0.15)}
 .filter-group{margin-bottom:1.5rem}
 .filter-group h4{font-family:var(--font-body);font-size:0.85rem;font-weight:600;color:var(--text-secondary);margin-bottom:0.75rem;text-transform:uppercase;letter-spacing:0.5px}

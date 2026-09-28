@@ -11,7 +11,7 @@ import {
 
 export default function CatalogPage() {
   const [loaded, setLoaded] = useState(false);
-  const [rebuildKey, setRebuildKey] = useState(0);
+  const [, setRebuildKey] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showFilterToggle, setShowFilterToggle] = useState(false);
 
@@ -147,7 +147,7 @@ export default function CatalogPage() {
             </div>
 
             <p className="product-count" id="product-count">{loaded ? countText : ''}</p>
-            <div className="catalog-grid" id="catalog-grid" key={rebuildKey}>
+            <div className="catalog-grid" id="catalog-grid">
               {loaded && filtered.length === 0 && (
                 <div className="no-results" style={{ gridColumn: '1/-1' }}>
                   <h3>Sin resultados</h3>
