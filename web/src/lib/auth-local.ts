@@ -221,6 +221,21 @@ function _clearRateLimit(storageKey: string): void {
   _localRemove(storageKey);
 }
 
+/* ---------- Session-change notification ---------- */
+
+let _notify: (() => void) | null = null;
+
+export function onLocalAuthChange(callback: () => void): () => void {
+  _notify = callback;
+  return () => { _notify = null; };
+}
+
+function _emitLocalAuthChange(): void {
+  if (typeof window === 'undefined') return;
+  if (_notify) _notify();
+  window.dispatchEvent(new CustomEvent('auth:change'));
+}
+
 /* ---------- Public API ---------- */
 
 export interface LocalRegisterResult {
@@ -338,6 +353,7 @@ export async function localVerify(code: string): Promise<LocalVerifyResult> {
     isLocal: true,
     expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
   });
+  _emitLocalAuthChange();
   return { success: true, message: 'Cuenta verificada. Sesion iniciada.' };
 }
 
@@ -438,11 +454,13 @@ export async function localLogin(
     isLocal: true,
     expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
   });
+  _emitLocalAuthChange();
   return { success: true, message: 'Sesion iniciada. Bienvenido, ' + user.name + '!' };
 }
 
 export function localLogout(): void {
   _localRemove(LOCAL_SESSION_KEY);
+  _emitLocalAuthChange();
 }
 
 export interface LocalUser {

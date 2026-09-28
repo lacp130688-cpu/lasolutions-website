@@ -5,7 +5,7 @@
    ============================================ */
 
 import { supabase } from './supabase-config';
-import { localGetCurrentUser, localLogout } from './auth-local';
+import { localGetCurrentUser, localLogout, onLocalAuthChange, LOCAL_SESSION_KEY } from './auth-local';
 
 export interface AuthUser {
   id: string;
@@ -62,5 +62,25 @@ export function onAuthChange(callback: AuthChangeCallback): (() => void) | null 
       callback(null);
     }
   });
-  return () => { subscription.unsubscribe(); };
+
+  // Local (demo) sessions live in localStorage and are not visible to
+  // supabase-js. Recompute the current user whenever the local session
+  // changes (same tab) or when another tab writes it (storage event).
+  const refreshLocal = () => { getCurrentUser().then(callback); };
+  const unsubLocal = onLocalAuthChange(refreshLocal);
+
+  let unsubStorage: (() => void) | null = null;
+  if (typeof window !== 'undefined') {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === LOCAL_SESSION_KEY || e.key === null) refreshLocal();
+    };
+    window.addEventListener('storage', onStorage);
+    unsubStorage = () => window.removeEventListener('storage', onStorage);
+  }
+
+  return () => {
+    subscription.unsubscribe();
+    unsubLocal();
+    if (unsubStorage) unsubStorage();
+  };
 }
