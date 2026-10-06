@@ -3,7 +3,8 @@ import type { NextRequest } from 'next/server';
 import { getAdminContext } from '@/lib/api-auth';
 
 const DANGEROUS_URL_RE = /^(javascript|data|vbscript|file):/i;
-const ALLOWED_URL_RE = /^(https?:\/\/|\/|\.\/|\.\.\/|assets\/)/i;
+const ALLOWED_URL_RE = /^(https:\/\/|\/|\.\/|\.\.\/|assets\/)/i;
+const ALLOWED_CATEGORIES = ['Escritorio', 'Gaming', 'Laptop'];
 
 function buildProductPayload(body: unknown): { obj: Record<string, unknown> } | { error: string } {
   const p = (body || {}) as Record<string, unknown>;
@@ -29,6 +30,11 @@ function buildProductPayload(body: unknown): { obj: Record<string, unknown> } | 
   const specs = Array.isArray(p.specs) ? p.specs : [];
   const asString = (v: unknown) => (typeof v === 'string' ? v : v === null || v === undefined ? '' : String(v));
 
+  const category = asString(p.category).trim();
+  if (!ALLOWED_CATEGORIES.includes(category)) {
+    return { error: 'La categoria debe ser Escritorio, Gaming o Laptop.' };
+  }
+
   let image = asString(p.image).trim();
   if (image) {
     if (DANGEROUS_URL_RE.test(image) || !ALLOWED_URL_RE.test(image)) {
@@ -41,7 +47,7 @@ function buildProductPayload(body: unknown): { obj: Record<string, unknown> } | 
   return {
     obj: {
       name,
-      category: asString(p.category),
+      category,
       brand: asString(p.brand),
       price,
       original_price: originalPrice,

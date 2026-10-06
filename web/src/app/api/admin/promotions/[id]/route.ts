@@ -59,6 +59,15 @@ export async function PUT(request: NextRequest, { params }: Params) {
     return NextResponse.json({ error: built.error }, { status: 400 });
   }
 
+  const { data: product } = await ctx.client
+    .from('products')
+    .select('id')
+    .eq('id', built.obj.product_id)
+    .maybeSingle();
+  if (!product) {
+    return NextResponse.json({ error: 'El producto seleccionado no existe.' }, { status: 400 });
+  }
+
   const { data, error } = await ctx.client
     .from('promotions')
     .update(built.obj)

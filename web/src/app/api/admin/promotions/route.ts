@@ -72,6 +72,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: built.error }, { status: 400 });
   }
 
+  const { data: product } = await ctx.client
+    .from('products')
+    .select('id')
+    .eq('id', built.obj.product_id)
+    .maybeSingle();
+  if (!product) {
+    return NextResponse.json({ error: 'El producto seleccionado no existe.' }, { status: 400 });
+  }
+
   const { error } = await ctx.client.from('promotions').insert(built.obj);
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
