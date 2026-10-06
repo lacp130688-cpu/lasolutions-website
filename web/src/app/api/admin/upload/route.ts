@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getAdminContext } from '@/lib/supabase-server';
+import { getAdminContext } from '@/lib/api-auth';
 import { SUPABASE_URL } from '@/lib/supabase-config';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];

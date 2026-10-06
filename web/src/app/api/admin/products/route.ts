@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getAdminContext } from '@/lib/supabase-server';
+import { getAdminContext } from '@/lib/api-auth';
 
 const DANGEROUS_URL_RE = /^(javascript|data|vbscript|file):/i;
 const ALLOWED_URL_RE = /^(https?:\/\/|\/|\.\/|\.\.\/|assets\/)/i;

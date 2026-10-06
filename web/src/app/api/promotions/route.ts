@@ -1,7 +1,14 @@
 import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase-server';
+import { verifyOptionalUser } from '@/lib/api-auth';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const session = await verifyOptionalUser(request);
+  if ('ok' in session) {
+    return NextResponse.json({ error: session.error }, { status: session.status });
+  }
+
   const client = createServerSupabase();
 
   const { data, error } = await client.from('promotions').select('*').eq('active', true);

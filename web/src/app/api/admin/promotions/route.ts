@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getAdminContext } from '@/lib/supabase-server';
+import { getAdminContext } from '@/lib/api-auth';
 
 function buildPromotionPayload(body: unknown): { obj: Record<string, unknown> } | { error: string } {
   const p = (body || {}) as Record<string, unknown>;

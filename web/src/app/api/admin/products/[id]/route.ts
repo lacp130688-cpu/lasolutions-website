@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getAdminContext } from '@/lib/supabase-server';
+import { getAdminContext } from '@/lib/api-auth';
 
 type Params = { params: Promise<{ id: string }> };
 

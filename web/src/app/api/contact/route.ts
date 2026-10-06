@@ -1,10 +1,16 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase-server';
+import { verifyOptionalUser } from '@/lib/api-auth';
 
 const EMAIL_RE = /.+@.+\..+/;
 
 export async function POST(request: NextRequest) {
+  const session = await verifyOptionalUser(request);
+  if ('ok' in session) {
+    return NextResponse.json({ error: session.error }, { status: session.status });
+  }
+
   let body: unknown;
   try {
     body = await request.json();
