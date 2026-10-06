@@ -68,12 +68,25 @@ export async function PUT(request: NextRequest, { params }: Params) {
     return NextResponse.json({ error: 'El producto seleccionado no existe.' }, { status: 400 });
   }
 
+  const { data: existing } = await ctx.client
+    .from('promotions')
+    .select('id')
+    .eq('product_id', built.obj.product_id)
+    .neq('id', id)
+    .maybeSingle();
+  if (existing) {
+    return NextResponse.json({ error: 'Ya existe una promocion para este producto.' }, { status: 400 });
+  }
+
   const { data, error } = await ctx.client
     .from('promotions')
     .update(built.obj)
     .eq('id', id)
     .select('id');
   if (error || !data || data.length === 0) {
+    if (error?.code === '23505') {
+      return NextResponse.json({ error: 'Ya existe una promocion para este producto.' }, { status: 400 });
+    }
     return NextResponse.json({ error: error ? error.message : 'Promocion no encontrada.' }, { status: 400 });
   }
 
