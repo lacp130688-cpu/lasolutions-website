@@ -1,0 +1,12 @@
+{
+  "name": "lasolutions-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "E2E probe del panel admin contra el sitio en produccion (Cloudflare Workers + Supabase). Requiere Chrome/Edge instalado.",
+  "scripts": {
+    "e2e": "node probe.e2e.js"
+  },
+  "dependencies": {
+    "puppeteer-core": "^25.12.0"
+  }
+}

@@ -17,3 +17,9 @@ Desktop.ini
 .env.local
 .env.production
 netlify/functions/**/.env
+
+# Dependencies / test artifacts
+node_modules/
+e2e/node_modules/
+e2e/e2e.png
+e2e/shots/
